@@ -11,21 +11,23 @@
 #
 ###########################################################################
 
+ZENJMX_HOME=$(PWD)
+LIB_DIR=$(ZENJMX_HOME)/lib
+TARGET=$(ZENJMX_HOME)/target
 
-default: egg
-
-
-egg:
-    # setup.py will call 'make build' before creating the egg
-	python setup.py bdist_egg
+default: install
 
 
-build:
-	cd ZenPacks/zenoss/ZenJMX; make install
+install:
+	mvn assembly:assembly
+
+	mkdir -p ${LIB_DIR} ; \
+	cd ${LIB_DIR} ; \
+	tar xzf ${TARGET}/*-bin.tar.gz
+
+	cp ${ZENJMX_HOME}/zenjmx.conf ${LIB_DIR}
 
 
 clean:
-	rm -rf build dist
-	rm -rf *.egg-info
-	find . -name *.pyc | xargs rm
-	cd ZenPacks/zenoss/ZenJMX; make clean
+	rm -rf ${LIB_DIR}
+	rm -rf ${TARGET}
