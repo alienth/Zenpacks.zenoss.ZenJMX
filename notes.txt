@@ -1,0 +1,53 @@
+To start up Tomcat with remote JMX access enabled:
+
+JAVA_OPTS="-Dcom.sun.management.jmxremote.port=12346"
+JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
+JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
+export JAVA_OPTS
+
+
+
+To start up JBoss with remote JMX access enabled:
+
+JAVA_OPTS="-Dcom.sun.management.jmxremote.port=12345"
+JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false"
+JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.ssl=false"
+JAVA_OPTS="${JAVA_OPTS} -Djboss.platform.mbeanserver"
+JAVA_OPTS="${JAVA_OPTS} -Djavax.management.builder.initial=org.jboss.system.server.jmx.MBeanServerBuilderImpl"
+export JAVA_OPTS
+
+Note:  you also need to pass "-b 0.0.0.0" to run.sh
+
+
+
+To start up WebLogic with remote JMX access enabled:
+
+JAVA_OPTIONS="-Dcom.sun.management.jmxremote.port=12347"
+JAVA_OPTIONS="${JAVA_OPTIONS} -Dcom.sun.management.jmxremote.authenticate=false"
+JAVA_OPTIONS="${JAVA_OPTIONS} -Dcom.sun.management.jmxremote.ssl=false"
+export JAVA_OPTIONS
+
+
+
+To start up JConsole and produce useful client side logging and a
+logging.properties that looks like this:
+
+handlers = java.util.logging.ConsoleHandler
+.level = INFO
+
+java.util.logging.ConsoleHandler.level = FINEST
+java.util.logging.ConsoleHandler.formatter = \
+                java.util.logging.SimpleFormatter
+
+ // Use FINER or FINEST for javax.management.remote.level - FINEST is
+ // very verbose...
+javax.management.level = FINEST
+javax.management.remote.level = FINER
+
+
+Then start up JConsole like this:
+
+jconsole -J-Djava.util.logging.config.file=logging.propeies
+
+
+Note:  Yes, it's -J-D without a space.  Kinda weird

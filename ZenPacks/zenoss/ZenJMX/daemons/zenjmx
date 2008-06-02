@@ -1,0 +1,60 @@
+#! /usr/bin/env bash
+###########################################################################
+#
+# This program is part of Zenoss Core, an open source monitoring platform.
+# Copyright (C) 2007, Zenoss Inc.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 as published by
+# the Free Software Foundation.
+#
+# For complete information please visit: http://www.zenoss.com/oss/
+#
+###########################################################################
+
+. $ZENHOME/bin/zenfunctions
+
+MYPATH=`python -c "import os.path; print os.path.realpath('$0')"`
+THISDIR=`dirname $MYPATH`
+PRGHOME=`dirname $THISDIR`
+PRGNAME=zenjmx
+#CFGFILE=$CFGDIR/zenjmx.conf
+#generic "$@"
+
+
+
+ZENJMX_HOME=${PRGHOME}
+LIB_DIR=${ZENJMX_HOME}/lib
+
+CFGFILE=${ZENHOME}/etc/zenjmx.conf
+PIDFILE=${ZENHOME}/var/zenjmx-`grep confName ${CFGFILE} | awk '{print $2}'`.pid
+
+if [ ! -f ${CFGFILE} ]; then
+    cp ${LIB_DIR}/zenjmx.conf ${CFGFILE}
+fi
+
+
+CMD=$1
+shift
+
+. ${ZENJMX_HOME}/bin/java-functions.sh
+
+LOG4J_PROPS=${ZENJMX_HOME}/src/main/resources/log4j.properties
+replace "@@ZENJMX_LOGFILE@@" "${ZENHOME}/log/zenjmx.log" ${LOG4J_PROPS}
+
+cd ${LIB_DIR}
+CLASSPATH="${ZENJMX_HOME}:${LIB_DIR}"
+for jar in \
+    `find . -name \*.jar`
+do
+    CLASSPATH="${CLASSPATH}:${jar}"
+done
+
+# these variables must be set (this includes CLASSPATH, which is set above)
+MAIN_CLASS="com.zenoss.zenpacks.zenjmx.Main"
+START_ARGS="--configfile ${CFGFILE} --cycle $@"
+RUN_ARGS="--configfile ${CFGFILE} $@"
+JMX_LISTEN_PORT="11111"
+
+
+generic $@
