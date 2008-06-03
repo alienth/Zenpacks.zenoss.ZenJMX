@@ -1,1 +1,1 @@
-include-recursive ZenPacks/zenoss/lib/*
+recursive-include ZenPacks/zenoss/ZenJMX/lib *
