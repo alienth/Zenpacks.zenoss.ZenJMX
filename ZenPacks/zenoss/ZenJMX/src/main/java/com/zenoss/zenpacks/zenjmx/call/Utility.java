@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 
 /**
- * <p></p>
+ * <p> Commonly used methods.  </p>
  *
  * <p>$Author: chris $</p>
  *
@@ -49,17 +49,36 @@ public class Utility {
 
   /**
    * Creates a URL based on the configuration provided.
+   * @returns a jmx connection url
+   * @throws ConfigurationException if the url is invalid (if the hostname 
+   *         or port cannot be found in the configuration)
    */
-  public static String getUrl(Map config) {
+  public static String getUrl(Map config) 
+    throws ConfigurationException {
+
     String port = get(config, "jmxPort", "zJmxManagementPort");
+    if ("".equals(port)) {
+      String message = "jmxPort or zJmxManagementPort not specified";
+      throw new ConfigurationException(message);
+    }
+
     String hostAddr = null;
     
-    if (config.containsKey("manageIp"))
-       hostAddr = (String)config.get("manageIp");
-    // Support pre-2.1.3+ hub xml-rpc responses. If manageIp is not present
-    // in configuration, fallback to device, which will have a better chance
-    // of working than null.
-    else hostAddr = (String)config.get("device"); 
+    if (config.containsKey("manageIp")) {
+       hostAddr = (String) config.get("manageIp");
+    } else {
+      /*
+       * Support pre-2.1.3+ hub xml-rpc responses. If manageIp is not
+       * present in configuration, fallback to device, which will have
+       * a better chance of working than null.
+       */
+      hostAddr = (String) config.get("device"); 
+    }
+    
+    if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
+      String message = "manageIp or device properties not specified";
+      throw new ConfigurationException(message);
+    }
     
     String url = 
       "service:jmx:rmi:///jndi/rmi://" + hostAddr + ":" + port + "/jmxrmi";
@@ -111,6 +130,14 @@ public class Utility {
       return true;
     }
 
+    if ((obj1 == null) && (obj2 != null)) {
+      return false;
+    }
+
+    if ((obj1 != null) && (obj2 == null)) {
+      return false;
+    }
+
     return obj1.equals(obj2);
   }
 
@@ -122,6 +149,14 @@ public class Utility {
   public static boolean equals(Object[] obj1, Object[] obj2) {
     if ((obj1 == null) && (obj2 == null)) {
       return true;
+    }
+
+    if ((obj1 == null) && (obj2 != null)) {
+      return false;
+    }
+
+    if ((obj1 != null) && (obj2 == null)) {
+      return false;
     }
 
     if (obj1.length != obj2.length) {
