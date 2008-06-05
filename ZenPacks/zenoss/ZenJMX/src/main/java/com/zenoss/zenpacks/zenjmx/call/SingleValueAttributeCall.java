@@ -48,6 +48,7 @@ public class SingleValueAttributeCall
   private static final Log _logger = 
     LogFactory.getLog(SingleValueAttributeCall.class);
 
+
   /**
    * Creates a SingleAttributeCall
    */
@@ -68,6 +69,12 @@ public class SingleValueAttributeCall
 
     _summary.setCallSummary("single-value attribute: " + attrName);
   }
+
+
+  /**
+   * Returns the name of the attribute this call will retrieve.
+   */
+  public String getAttributeName() { return _attrName; }
 
   
   /**
@@ -131,6 +138,24 @@ public class SingleValueAttributeCall
                                    (String) config.get(ATTRIBUTE_NAME),
                                    type);
     return call;
+  }
+
+
+  /**
+   * @see Object#equals
+   */
+  public boolean equals(Object other) {
+    if (! (other instanceof SingleValueAttributeCall)) {
+      return false;
+    }
+
+    boolean toReturn = super.equals(other);
+
+    SingleValueAttributeCall call = (SingleValueAttributeCall) other;
+
+    toReturn &= Utility.equals(call.getAttributeName(), getAttributeName());
+    
+    return toReturn;
   }
   
 

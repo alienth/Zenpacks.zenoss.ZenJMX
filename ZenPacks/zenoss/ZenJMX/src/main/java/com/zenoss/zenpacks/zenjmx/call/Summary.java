@@ -14,6 +14,10 @@ package com.zenoss.zenpacks.zenjmx.call;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+
 /**
  * <p> Bean that carries results of a Call (along with some metadata)
  * between the Callables and the Processor.  </p>
@@ -51,6 +55,9 @@ public class Summary {
 
   // flag indicating the call was cancelled
   private boolean _cancelled = false;
+
+  // logger
+  private static final Log _logger = LogFactory.getLog(Summary.class);
 
 
   /**
@@ -174,4 +181,31 @@ public class Summary {
       "\tcancelled: " + isCancelled() + "\n" +
       "\tresults: " + getResults() + "\n";
   }
+
+
+  /**
+   * @see Object#equals
+   */
+  public boolean equals(Object other) {
+    if (! (other instanceof Summary)) {
+      return false;
+    }
+
+    boolean toReturn = true;
+
+    Summary summary = (Summary) other;
+
+    toReturn &= Utility.equals(summary.getCallId(), getCallId());
+    toReturn &= Utility.equals(summary.getDeviceId(), getDeviceId());
+    toReturn &= Utility.equals(summary.getDataSourceId(), getDataSourceId());
+    toReturn &= Utility.equals(summary.getResults(), getResults());
+    toReturn &= Utility.equals(summary.getTypeMap(), getTypeMap());
+    toReturn &= Utility.equals(summary.getObjectName(), getObjectName());
+    toReturn &= Utility.equals(summary.getCallSummary(), getCallSummary());
+    toReturn &= summary.getRuntime() == getRuntime();
+    toReturn &= summary.isCancelled() == isCancelled();
+    
+    return toReturn;
+  }
+
 }
