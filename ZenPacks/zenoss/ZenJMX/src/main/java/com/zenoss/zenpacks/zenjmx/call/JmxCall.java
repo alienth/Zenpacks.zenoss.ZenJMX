@@ -25,6 +25,9 @@ import java.io.IOException;
 import com.zenoss.jmx.JmxClient;
 import com.zenoss.jmx.JmxException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * <p> Callable that queries a JMX Agent. </p>
@@ -49,6 +52,8 @@ public abstract class JmxCall
   public static String PASSWORD = "password";
   public static String OBJECT_NAME = "objectName";
   public static String TYPES = "dptypes";
+
+  private static final Log _logger = LogFactory.getLog(JmxCall.class);
 
   
   // configuration...
@@ -92,6 +97,37 @@ public abstract class JmxCall
 
     _objectName = objectName;
   }
+
+
+  /**
+   * Returns a boolean that indicates whether or not authentication
+   * should be attempted.
+   */
+  public boolean getAuthenticate() { return _authenticate; }
+
+
+  /**
+   * Returns the username used to authentication.
+   */
+  public String getUsername() { return _username; }
+
+
+  /**
+   * Returns the password used to authentication.
+   */
+  public String getPassword() { return _password; }
+
+
+  /**
+   * Returns the mbean that will be called
+   */
+  public String getObjectName() { return _objectName; }
+
+
+  /**
+   * Returns a summary of the call
+   */
+  public Summary getSummary() { return _summary; }
 
 
   /**
@@ -156,6 +192,26 @@ public abstract class JmxCall
     }
   }
 
+
+  /**
+   * @see Object#equals
+   */
+  public boolean equals(Object other) {
+    if (! (other instanceof JmxCall)) {
+      return false;
+    }
+
+    boolean toReturn = true;
+
+    JmxCall call = (JmxCall) other;
+
+    toReturn &= call.getUsername().equals(getUsername());
+    toReturn &= call.getPassword().equals(getPassword());
+    toReturn &= call.getObjectName().equals(getObjectName());
+    toReturn &= call.getSummary().equals(getSummary());
+
+    return toReturn;
+  }
 
 
   /**
