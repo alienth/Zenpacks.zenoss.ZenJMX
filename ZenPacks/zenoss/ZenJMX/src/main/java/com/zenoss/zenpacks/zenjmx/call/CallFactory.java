@@ -51,8 +51,12 @@ public class CallFactory {
   /**
    * Creates a JmxCall from a configuration read from the server
    * @param config the name-value parameters from the server
+   * @throws ConfigurationException if the configuration provided does not
+   *         contain sufficient information to create a call.
    */
-  public static JmxCall createCall(Map config) {
+  public static JmxCall createCall(Map config) 
+    throws ConfigurationException {
+
     _logger.debug("config: " + config);
 
     Object[] datapoints = (Object[]) config.get(DATA_POINT);
