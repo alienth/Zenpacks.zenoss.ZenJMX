@@ -116,7 +116,9 @@ public class SingleValueAttributeCall
   /**
    * Creates a SingleValueAttributeCall from the configuration provided
    */
-  public static SingleValueAttributeCall fromValue(Map config) {
+  public static SingleValueAttributeCall fromValue(Map config) 
+    throws ConfigurationException {
+
     String url = Utility.getUrl(config);
     boolean auth = false;
     if (config.containsKey(AUTHENTICATE)) {

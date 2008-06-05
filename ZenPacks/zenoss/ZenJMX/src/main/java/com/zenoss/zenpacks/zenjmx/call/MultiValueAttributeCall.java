@@ -126,7 +126,9 @@ public class MultiValueAttributeCall
   /**
    * Creates a MultiValueAttributeCall from the configuration provided
    */
-  public static MultiValueAttributeCall fromValue(Map config) {
+  public static MultiValueAttributeCall fromValue(Map config) 
+    throws ConfigurationException {
+
     String url = Utility.getUrl(config);
     boolean auth = false;
     if (config.containsKey(AUTHENTICATE)) {

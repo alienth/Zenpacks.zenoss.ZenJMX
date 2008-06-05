@@ -236,7 +236,9 @@ public class OperationCall
   /**
    * Creates a OperationCall from the configuration provided
    */
-  public static OperationCall fromValue(Map config) {
+  public static OperationCall fromValue(Map config) 
+    throws ConfigurationException {
+
     String url = Utility.getUrl(config);
     boolean auth = false;
     if (config.containsKey(AUTHENTICATE)) {
