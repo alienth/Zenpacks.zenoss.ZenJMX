@@ -100,4 +100,40 @@ public class Utility {
 
     return dest;
   }
+
+
+  /**
+   * Returns true if the two objects are both null or are equal to
+   * each other
+   */
+  public static boolean equals(Object obj1, Object obj2) {
+    if ((obj1 == null) && (obj2 == null)) {
+      return true;
+    }
+
+    return obj1.equals(obj2);
+  }
+
+
+  /**
+   * Returns true the object arrays are both null or are equal to each
+   * other
+   */
+  public static boolean equals(Object[] obj1, Object[] obj2) {
+    if ((obj1 == null) && (obj2 == null)) {
+      return true;
+    }
+
+    if (obj1.length != obj2.length) {
+      return false;
+    }
+    
+    boolean toReturn = true;
+    for (int i = 0; i < obj1.length; i++) {
+      toReturn &= equals(obj1[i], obj2[i]);
+    }
+
+    return toReturn;
+  }
+
 }
