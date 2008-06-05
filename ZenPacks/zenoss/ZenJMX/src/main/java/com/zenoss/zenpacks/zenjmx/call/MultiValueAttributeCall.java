@@ -78,6 +78,19 @@ public class MultiValueAttributeCall
 
 
   /**
+   * Returns the name of the attribute being queried
+   */
+  public String getAttributeName() { return _attrName; }
+
+
+  /**
+   * Returns the sub-attribute names that are being queried.  These
+   * are the fields of the multi-value attribute we are interested in.
+   */
+  public List<String> getKeys() { return _keys; }
+
+
+  /**
    * @see Callable#call
    */
   public Summary call() 
@@ -137,6 +150,25 @@ public class MultiValueAttributeCall
     return call;
   }
 
+
+  /**
+   * @see Object#equals
+   */
+  public boolean equals(Object other) {
+    if (! (other instanceof MultiValueAttributeCall)) {
+      return false;
+    }
+
+    boolean toReturn = super.equals(other);
+
+    MultiValueAttributeCall call = (MultiValueAttributeCall) other;
+
+    toReturn &= Utility.equals(call.getAttributeName(), getAttributeName());
+    toReturn &= Utility.equals(call.getKeys(), getKeys());
+    
+    return toReturn;
+  }
+  
 
   /**
    * @see JmxCall#hashCode
