@@ -275,6 +275,30 @@ public class OperationCall
 
 
   /**
+   * Returns the name of the operation to invoke
+   */
+  public String getOperationName() { return _operationName; }
+
+
+  /**
+   * Returns the values of the parameters passed to the operation
+   */
+  public Object[] getValues() { return _values; }
+
+
+  /**
+   * Returns the types of the parameters passed to the operation
+   */
+  public String[] getTypes() { return _types; }
+
+
+  /**
+   * Returns the keys we are interested in extracting from the result
+   */
+  public List<String> getKeys() { return _keys; }
+
+
+  /**
    * @see JmxCall#hashCode
    */
   public int hashCode() {
@@ -297,5 +321,26 @@ public class OperationCall
     hc += hashCode(_keys);
 
     return hc;
+  }
+
+
+  /**
+   * @see Object#equals
+   */
+  public boolean equals(Object other) {
+    if (! (other instanceof OperationCall)) {
+      return false;
+    }
+
+    boolean toReturn = super.equals(other);
+
+    OperationCall call = (OperationCall) other;
+
+    toReturn &= Utility.equals(call.getOperationName(), getOperationName());
+    toReturn &= Utility.equals(call.getValues(), getValues());
+    toReturn &= Utility.equals(call.getTypes(), getTypes());
+    toReturn &= Utility.equals(call.getKeys(), getKeys());
+    
+    return toReturn;
   }
 }
