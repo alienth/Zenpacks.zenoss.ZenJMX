@@ -7,16 +7,16 @@
 import Globals
 from Products.ZenModel.migrate.Migrate import Version
 from Products.ZenModel.ZenPack import ZenPack, ZenPackDataSourceMigrateBase
-from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import ZenJMXDataSource
+from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import JMXDataSource
 
 
-class ConvertZenJMXDataSources(ZenPackDataSourceMigrateBase):
+class ConvertJMXDataSources(ZenPackDataSourceMigrateBase):
     version = Version(2, 0, 0)
     
     # These provide for conversion of datasource instances to the new class
-    dsClass = ZenJMXDataSource
-    oldDsModuleName = 'Products.ZenJMX.datasources.ZenJMXDataSource'
-    oldDsClassName = 'ZenJMXDataSource'
+    dsClass = JMXDataSource
+    oldDsModuleName = 'Products.ZenJMX.datasources.JMXDataSource'
+    oldDsClassName = 'JMXDataSource'
     
     # Reindex all applicable datasource instances
     reIndex = True

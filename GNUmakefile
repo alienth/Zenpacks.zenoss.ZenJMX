@@ -25,7 +25,7 @@ build:
 
 
 clean:
-	rm -rf build dist
+	rm -rf build dist temp
 	rm -rf *.egg-info
 	find . -name *.pyc | xargs rm
 	cd ZenPacks/zenoss/ZenJMX; make clean

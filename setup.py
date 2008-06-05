@@ -69,8 +69,6 @@ setup(
     # with the binary egg.
     package_data = { 
          '': ['*.txt'],
-         NAME: ['objects/*','skins/*/*','services/*', 'reports/*/*',
-                'modeler/*/*', 'daemons/*', 'libexec/*'],
          },  
 
     # Indicate dependencies on other python modules or ZenPacks.  This line

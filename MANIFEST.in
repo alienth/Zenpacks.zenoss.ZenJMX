@@ -1,1 +1,3 @@
-recursive-include ZenPacks/zenoss/ZenJMX/lib *
+graft ZenPacks/zenoss/ZenJMX
+exclude ZenPacks/zenoss/ZenJMX/GNUmakefile
+exclude ZenPacks/zenoss/ZenJMX/pom.xml
