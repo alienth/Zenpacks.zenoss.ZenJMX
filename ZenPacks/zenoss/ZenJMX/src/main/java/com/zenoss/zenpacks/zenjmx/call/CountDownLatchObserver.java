@@ -13,6 +13,7 @@
 package com.zenoss.zenpacks.zenjmx.call;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import java.net.InetAddress;
 
@@ -65,11 +66,18 @@ public class CountDownLatchObserver
   public void run() {
     try {
       // block until the latch is opened
-      _latch.await();
+      boolean zeroCount = _latch.await(360, TimeUnit.SECONDS);
 
-      // send a heartbeat via the reactor
-      Reactor reactor = Reactor.instance();
-      reactor.sendHeartbeat();
+      if(!zeroCount)//await timed out
+      {
+        _logger.warn("Timed out waiting for latch; not sending heartbeat");
+      }
+      else
+      {
+        // send a heartbeat via the reactor
+        Reactor reactor = Reactor.instance();
+        reactor.sendHeartbeat();
+      }
     } catch (Throwable e) {
       _logger.error("unexpected error while observing the latch", e);
     }

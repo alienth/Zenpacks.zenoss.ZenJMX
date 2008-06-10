@@ -95,27 +95,25 @@ public class Processor
         summary = _handle.get(_timeout, SECONDS);
         _logger.info("(" + _callId + "): result: " + summary);
 
-        // notify the reactor that the results were received
-        reactor.removePending(_callId);
-
         // post the performance information up to the server
         postResults(summary);
 
       } catch (TimeoutException e) {
         _logger.warn("(" + _callId + "): timeout occurred during request");
-        reactor.removePending(_callId);
       } catch (Exception e) {
         _logger.error("(" + _callId + "): error occurred while getting result", e);
+      }finally{
+        // notify the reactor that the call is finished
         reactor.removePending(_callId);
       }
-
       // set the summary to null so it can be gc'ed
       summary = null;
 
-      // notch one off the count down latch
-      _latch.countDown();
     } catch (Throwable e) {
       _logger.error("unexpected error processing jmx results", e);
+    }finally{
+      // notch one off the count down latch
+      _latch.countDown();
     }
   }
 

@@ -218,6 +218,7 @@ public class Reactor {
           addPending(hc);
           process(handle, latch, hc);
         } else {
+          latch.countDown();
           _logger.warn("previously issued JMX call (" + hc + ") has not " +
                        "completed yet.");
           _logger.warn("blocking subsequent calls until the call completes.");
