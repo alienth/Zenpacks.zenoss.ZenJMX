@@ -36,7 +36,7 @@ shift
 
 . ${ZENJMX_HOME}/bin/java-functions.sh
 
-LOG4J_PROPS=${ZENJMX_HOME}/src/main/resources/log4j.properties
+LOG4J_PROPS=`find ${LIB_DIR} -name log4j.properties`
 replace "@@ZENJMX_LOGFILE@@" "${ZENHOME}/log/zenjmx.log" ${LOG4J_PROPS}
 
 cd ${LIB_DIR}
