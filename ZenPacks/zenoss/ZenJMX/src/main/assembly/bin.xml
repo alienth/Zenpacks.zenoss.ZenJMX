@@ -20,5 +20,13 @@
         <include>*.jar</include>
       </includes>
     </fileSet>
+
+    <fileSet>
+      <directory>src/main/resources</directory>
+      <outputDirectory/>
+      <includes>
+        <include>log4j.properties</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>
