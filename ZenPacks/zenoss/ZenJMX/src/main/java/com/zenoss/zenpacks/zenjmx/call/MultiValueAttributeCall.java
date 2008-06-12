@@ -95,31 +95,31 @@ public class MultiValueAttributeCall
    */
   public Summary call() 
     throws Exception {
-
-    // record when we started
-    _startTime = System.currentTimeMillis();
-
-    setCredentials();
+    try{
+        // record when we started
+        _startTime = System.currentTimeMillis();
     
-    // connect to the agent
-    _client.connect();
+        setCredentials();
+        
+        // connect to the agent
+        _client.connect();
+        
+        // issue the query
+        Map<String, Object> values = _client.query(_objectName, _attrName, _keys);
+        
+        _summary.setResults(values);
+        
+        // record the runtime of the call
+        _summary.setRuntime(System.currentTimeMillis() - _startTime);
     
-    // issue the query
-    Map<String, Object> values = _client.query(_objectName, _attrName, _keys);
+        // set our id so the processor can remove it from the reactor
+        _summary.setCallId(hashCode());
     
-    // disconnect from the agent.
-    _client.close();
-    
-    _summary.setResults(values);
-    
-    // record the runtime of the call
-    _summary.setRuntime(System.currentTimeMillis() - _startTime);
-
-    // set our id so the processor can remove it from the reactor
-    _summary.setCallId(hashCode());
-
-    // return result
-    return _summary;
+        // return result
+        return _summary;
+    }finally{
+        _client.close();
+    }
   }
 
 

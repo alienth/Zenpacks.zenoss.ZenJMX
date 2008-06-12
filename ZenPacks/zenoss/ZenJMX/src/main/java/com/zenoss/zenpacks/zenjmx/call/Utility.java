@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * <p> Commonly used methods.  </p>
@@ -26,6 +29,9 @@ import java.util.ArrayList;
  * @version $Revision: 1.6 $
  */
 public class Utility {
+
+    
+  private static final Log _logger = LogFactory.getLog(Utility.class);
 
   /**
    * Looks in the config Map provided and extracts the JMX property
@@ -65,6 +71,7 @@ public class Utility {
     String hostAddr = null;
     
     if (config.containsKey("manageIp")) {
+       _logger.debug("using manageIp for host address");
        hostAddr = (String) config.get("manageIp");
     } else {
       /*
@@ -72,7 +79,8 @@ public class Utility {
        * present in configuration, fallback to device, which will have
        * a better chance of working than null.
        */
-      hostAddr = (String) config.get("device"); 
+        _logger.debug("manageIp not in config, using device for host address");
+        hostAddr = (String) config.get("device"); 
     }
     
     if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
@@ -82,7 +90,7 @@ public class Utility {
     
     String url = 
       "service:jmx:rmi:///jndi/rmi://" + hostAddr + ":" + port + "/jmxrmi";
-    
+    _logger.debug("JMX URL is: "+url);
     return url;
   }
 

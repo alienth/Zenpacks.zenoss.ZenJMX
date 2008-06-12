@@ -206,30 +206,31 @@ public class OperationCall
   public Summary call()
     throws Exception {
 
-    // record when we started
-    _startTime = System.currentTimeMillis();
-
-    setCredentials();
+    try{
+        // record when we started
+        _startTime = System.currentTimeMillis();
     
-    // connect to the agent
-    _client.connect();
+        setCredentials();
+        
+        // connect to the agent
+        _client.connect();
+        
+        // issue the query
+        Object result = _client.invoke(_objectName, _operationName, 
+                                       _values, _types);
+        
+        _summary.setResults(marshal(result));
     
-    // issue the query
-    Object result = _client.invoke(_objectName, _operationName, 
-                                   _values, _types);
+        // record the runtime of the call
+        _summary.setRuntime(System.currentTimeMillis() - _startTime);
     
-    // disconnect from the agent.
-    _client.close();
-    
-    _summary.setResults(marshal(result));
-
-    // record the runtime of the call
-    _summary.setRuntime(System.currentTimeMillis() - _startTime);
-
-    // set our id so the processor can remove it from the reactor
-    _summary.setCallId(hashCode());
-    
-    return _summary;
+        // set our id so the processor can remove it from the reactor
+        _summary.setCallId(hashCode());
+        
+        return _summary;
+    }finally{
+        _client.close();
+    }
   }
 
 

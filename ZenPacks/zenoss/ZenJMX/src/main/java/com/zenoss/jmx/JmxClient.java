@@ -129,19 +129,20 @@ public class JmxClient {
    */
   public void close() 
     throws JmxException {
-
-    if (_connected) {
-      try {
-        _connector.close();
-      } catch (IOException e) {
-        throw new JmxException(e);
+    try{
+      if (_connected) {
+        try {
+          _connector.close();
+        } catch (IOException e) {
+          throw new JmxException(e);
+        }
       }
+    }finally{
+      _connected = false;
+      _connector = null;
+      _server = null;
+      _creds = null;
     }
-
-    _connected = false;
-    _connector = null;
-    _server = null;
-    _creds = null;
   }
 
 

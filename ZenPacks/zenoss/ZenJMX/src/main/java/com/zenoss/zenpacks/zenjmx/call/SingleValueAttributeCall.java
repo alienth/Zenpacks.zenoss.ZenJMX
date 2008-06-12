@@ -82,34 +82,37 @@ public class SingleValueAttributeCall
    */
   public Summary call() 
     throws Exception {
+    try{    // connect to the agent
+      // record when we started
+      _startTime = System.currentTimeMillis();
 
-    // record when we started
-    _startTime = System.currentTimeMillis();
+      setCredentials();
+    
+      _client.connect();
+    
+      // issue the query
 
-    setCredentials();
+        _logger.debug("in test code");
+      Object result = _client.query(_objectName, _attrName);
+      _client.close();
     
-    // connect to the agent
-    _client.connect();
+      // marshal the results
+      Map<String, Object> values = new HashMap<String, Object>();
+      values.put(_attrName, result);
+      _summary.setResults(values);
     
-    // issue the query
-    Object result = _client.query(_objectName, _attrName);
-    
-    // disconnect from the agent.
-    _client.close();
-    
-    // marshal the results
-    Map<String, Object> values = new HashMap<String, Object>();
-    values.put(_attrName, result);
-    _summary.setResults(values);
-    
-    // record the runtime of the call
-    _summary.setRuntime(System.currentTimeMillis() - _startTime);
+      // record the runtime of the call
+      _summary.setRuntime(System.currentTimeMillis() - _startTime);
 
-    // set our id so the processor can remove it from the reactor
-    _summary.setCallId(hashCode());
+      // set our id so the processor can remove it from the reactor
+      _summary.setCallId(hashCode());
 
-    // return result
-    return _summary;
+        // return result
+      return _summary;
+    }finally{
+       //disconnect from the agent.
+      _client.close();
+    }
   }
 
 
