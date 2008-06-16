@@ -100,6 +100,9 @@ status() {
     fi
 }
 
+genconf() {
+    cat ${LIB_DIR}/zenjmx.conf
+}
 
 generic() {
     case "$CMD" in
@@ -120,6 +123,9 @@ generic() {
 	    ;;
       help)
 	    help
+	    ;;
+      genconf)
+	    genconf
 	    ;;
       *)
 	    cat - <<HELP
@@ -142,6 +148,8 @@ Usage: $0 {run|start|stop|restart|status|help} [options]
     status  - Check the status of a daemon.  This will print the current
               process nuber if it is running.
 
+    genconf - Generate a template configuration file
+    
     help    - display the options available for the daemon
 
 
