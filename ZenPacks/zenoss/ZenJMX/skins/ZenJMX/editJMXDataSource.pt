@@ -104,6 +104,18 @@
                 tal:content="here/jmxPort"/>
         </tr>
         <tr>
+            <td class="tableheader">Protocol</td>
+            <td class="tablevalues" tal:condition="editable">
+            <select class="tablevalues" name="jmxProtocol:string">
+               <option tal:repeat="protocol here/getProtocols"
+                     tal:content="python:protocol"
+                     tal:attributes="selected python:protocol==here.jmxProtocol; value python:protocol"/>
+            </select>
+            </td>
+          <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/jmxProtocol"/>
+        </tr>
+        <tr>
             <td class="tableheader">Object Name</td>
             <td class="tablevalues" tal:condition="editable">
             <input class="tablevalues" type="text" name="objectName:string" size="50"

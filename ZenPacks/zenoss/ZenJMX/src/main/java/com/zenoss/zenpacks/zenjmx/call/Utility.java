@@ -63,6 +63,7 @@ public class Utility {
     throws ConfigurationException {
 
     String port = get(config, "jmxPort", "zJmxManagementPort");
+    String protocol = get(config, "jmxProtocol", "zJmxProtocol");
     if ("".equals(port)) {
       String message = "jmxPort or zJmxManagementPort not specified";
       throw new ConfigurationException(message);
@@ -88,8 +89,12 @@ public class Utility {
       throw new ConfigurationException(message);
     }
     
-    String url = 
-      "service:jmx:rmi:///jndi/rmi://" + hostAddr + ":" + port + "/jmxrmi";
+    String url = "service:jmx:";
+    if (protocol.equals("JMXMP"))
+      url += "jmxmp://" + hostAddr + ":" + port;
+    else
+      url += "rmi:///jndi/rmi://" + hostAddr + ":" + port + "/jmxrmi";
+
     _logger.debug("JMX URL is: "+url);
     return url;
   }

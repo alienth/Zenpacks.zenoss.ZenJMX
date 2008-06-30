@@ -43,6 +43,7 @@ class JMXDataSource(ZenPackPersistence, Base):
     expectedIpAddress = ''
 
     jmxPort = ''
+    jmxProtocol = 'RMI'
     objectName = ''
     username = ''
     password = ''
@@ -57,6 +58,7 @@ class JMXDataSource(ZenPackPersistence, Base):
 
     _properties = Base._properties + (
         {'id':'jmxPort', 'type':'string', 'mode':'w'},
+        {'id':'jmxProtocol', 'type':'string', 'mode':'w'},
         {'id':'objectName', 'type':'string', 'mode':'w'},
 
         {'id':'authenticate', 'type':'string', 'mode':'w'},
@@ -96,6 +98,11 @@ class JMXDataSource(ZenPackPersistence, Base):
         if self.sourcetype == self.JMX:
             return self.hostname
         return RRDDataSource.getDescription(self)
+
+
+    def getProtocols(self):
+        """return list of supported JMX protocols"""
+        return ['RMI', 'JMXMP']
 
 
     def zmanage_editProperties(self, REQUEST=None):
