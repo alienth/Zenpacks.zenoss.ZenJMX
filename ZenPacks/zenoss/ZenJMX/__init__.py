@@ -36,6 +36,5 @@ class ZenPack(ZenPackBase):
         ('zJmxAuthenticate', False, 'boolean'),
         ('zJmxUsername', 'admin', 'string'),
         ('zJmxPassword', 'admin', 'string'),
-        ('zJmxProtocol', 'RMI', 'string'),
         ]
 

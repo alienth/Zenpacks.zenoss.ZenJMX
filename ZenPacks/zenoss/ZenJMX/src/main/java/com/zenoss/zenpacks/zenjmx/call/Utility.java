@@ -44,10 +44,11 @@ public class Utility {
     if (config.containsKey(jProperty)) {
       toReturn = (String) config.get(jProperty);
     } 
-
-    if ("".equals(toReturn.trim()) && config.containsKey(zProperty)) {
-      toReturn = config.get(zProperty).toString();
-    }
+    //@TODO: zProperties are not added to config so this shouldn't find anything
+    if (zProperty != null && "".equals(toReturn.trim())
+                && config.containsKey(zProperty)) {
+            toReturn = config.get(zProperty).toString();
+        }
 
     return toReturn;
   }
@@ -63,7 +64,7 @@ public class Utility {
     throws ConfigurationException {
 
     String port = get(config, "jmxPort", "zJmxManagementPort");
-    String protocol = get(config, "jmxProtocol", "zJmxProtocol");
+    String protocol = get(config, "jmxProtocol", null);
     if ("".equals(port)) {
       String message = "jmxPort or zJmxManagementPort not specified";
       throw new ConfigurationException(message);
