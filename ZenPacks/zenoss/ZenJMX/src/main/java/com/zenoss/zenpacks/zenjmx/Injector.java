@@ -12,17 +12,16 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx;
 
-import com.zenoss.zenpacks.zenjmx.call.JmxCall;
-import com.zenoss.zenpacks.zenjmx.call.CallFactory;
-
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.zenoss.zenpacks.zenjmx.call.CallFactory;
+import com.zenoss.zenpacks.zenjmx.call.JmxCall;
 
 
 /**
@@ -44,12 +43,6 @@ public class Injector
   // set to true to indicate we should NOT shut down the reactor after this run
   private boolean _cycle;
 
-  // the JmxCalls we already know about
-  private Set<JmxCall> _calls;
-  
-  // the hashcodes of the calls we know about
-  private Set<Integer> _callIds;
-
   // logger
   private static final Log _logger = LogFactory.getLog(Injector.class);
 
@@ -60,8 +53,6 @@ public class Injector
   public Injector(boolean cycle) {
     _reactor = Reactor.instance();
     _cycle = cycle;
-    _calls = new HashSet<JmxCall>();
-    _callIds = new HashSet<Integer>();
   }
 
 
@@ -69,6 +60,8 @@ public class Injector
    * @see Runnable#run
    */
   public void run() {
+    Set<JmxCall> calls = new HashSet<JmxCall>();
+    Set<Integer> callIds = new HashSet<Integer>();
     try {
       // get configs from the reactor
       List<Map> configs = _reactor.getConfigs();
@@ -80,15 +73,15 @@ public class Injector
       // assemble the calls
       for (Map config : configs) {
         JmxCall call = CallFactory.createCall(config);
-        _logger.debug("calls size: " + _calls.size());
-        if (! _callIds.contains(call.hashCode())) {
-          _calls.add(call);
-          _callIds.add(call.hashCode());
+        _logger.debug("calls size: " + calls.size());
+        if (! callIds.contains(call.hashCode())) {
+          calls.add(call);
+          callIds.add(call.hashCode());
         }
       }
 
       // inject the calls
-      _reactor.dispatch(_calls);
+      _reactor.dispatch(calls);
 
       // optionally stop the reactor
       if (! _cycle) {
