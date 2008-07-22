@@ -36,10 +36,10 @@ shift
 
 . ${ZENJMX_HOME}/bin/java-functions.sh
 
+cd ${LIB_DIR}
 LOG4J_PROPS=`find ${LIB_DIR} -name log4j.properties`
 replace "@@ZENJMX_LOGFILE@@" "${ZENHOME}/log/zenjmx.log" ${LOG4J_PROPS}
 
-cd ${LIB_DIR}
 CLASSPATH="${ZENJMX_HOME}:${LIB_DIR}"
 for jar in \
     `find . -name \*.jar`
