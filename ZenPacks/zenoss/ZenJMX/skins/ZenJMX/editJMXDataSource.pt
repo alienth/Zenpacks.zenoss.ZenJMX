@@ -116,6 +116,15 @@
                 tal:content="here/jmxProtocol"/>
         </tr>
         <tr>
+            <td class="tableheader">RMI Context (URL context when using RMI protocol)</td>
+            <td class="tablevalues" tal:condition="editable">
+            <input class="tablevalues" type="text" name="rmiContext:string" size="50"
+                tal:attributes="value here/rmiContext" />
+            </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/rmiContext"/>
+        </tr>
+        <tr>
             <td class="tableheader">Object Name</td>
             <td class="tablevalues" tal:condition="editable">
             <input class="tablevalues" type="text" name="objectName:string" size="50"

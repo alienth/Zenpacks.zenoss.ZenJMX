@@ -44,6 +44,7 @@ class JMXDataSource(ZenPackPersistence, Base):
 
     jmxPort = ''
     jmxProtocol = 'RMI'
+    rmiContext = 'jmxrmi'
     objectName = ''
     username = ''
     password = ''
@@ -59,6 +60,7 @@ class JMXDataSource(ZenPackPersistence, Base):
     _properties = Base._properties + (
         {'id':'jmxPort', 'type':'string', 'mode':'w'},
         {'id':'jmxProtocol', 'type':'string', 'mode':'w'},
+        {'id':'rmiContext', 'type':'string', 'mode':'w'},
         {'id':'objectName', 'type':'string', 'mode':'w'},
 
         {'id':'authenticate', 'type':'string', 'mode':'w'},

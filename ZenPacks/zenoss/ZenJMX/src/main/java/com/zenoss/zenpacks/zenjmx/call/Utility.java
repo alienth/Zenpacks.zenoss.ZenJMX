@@ -64,6 +64,10 @@ public class Utility {
     throws ConfigurationException {
 
     String port = get(config, "jmxPort", "zJmxManagementPort");
+    String rmiContext = get(config, "rmiContext", null);
+    if(rmiContext == null || "".equals(rmiContext)){
+        rmiContext = "jmxrmi";  //default context for mbean server
+    }
     String protocol = get(config, "jmxProtocol", null);
     if ("".equals(port)) {
       String message = "jmxPort or zJmxManagementPort not specified";
@@ -94,7 +98,7 @@ public class Utility {
     if (protocol.equals("JMXMP"))
       url += "jmxmp://" + hostAddr + ":" + port;
     else
-      url += "rmi:///jndi/rmi://" + hostAddr + ":" + port + "/jmxrmi";
+      url += "rmi:///jndi/rmi://" + hostAddr + ":" + port + "/"+ rmiContext;
 
     _logger.debug("JMX URL is: "+url);
     return url;
