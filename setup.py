@@ -2,7 +2,7 @@
 # These variables are overwritten by Zenoss when the ZenPack is exported
 # or saved.  Do not modify them directly here.
 NAME = 'ZenPacks.zenoss.ZenJMX'
-VERSION = '2.1.0'
+VERSION = '2.1.1'
 AUTHOR = 'Zenoss'
 LICENSE = ''
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
@@ -32,7 +32,7 @@ class MyDist(Distribution):
 import subprocess
 p = subprocess.Popen('make build', shell=True)
 if p.poll() == None:
-	p.wait()
+    p.wait()
 if p.returncode != 0:
     raise Exception('make exited with an error: %s' % p.returncode)
 

@@ -12,15 +12,14 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.io.IOException;
-
+import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Arrays;
+import java.util.Set;
 
-import static com.zenoss.zenpacks.zenjmx.call.JmxCall.*;
 import static com.zenoss.zenpacks.zenjmx.call.CallFactory.*;
 
 import org.apache.commons.logging.Log;
@@ -52,6 +51,28 @@ public class OperationCall
   public static final String DELIMITER = ",";
 
 
+  
+  private static final Set<String> INT_TYPES = new HashSet<String>();
+  private static final Set<String> LONG_TYPES = new HashSet<String>();
+  private static final Set<String> DOUBLE_TYPES = new HashSet<String>();
+  private static final Set<String> FLOAT_TYPES = new HashSet<String>();
+  private static final Set<String> STRING_TYPES = new HashSet<String>();
+  static {
+      INT_TYPES.add(Integer.class.getName());
+      INT_TYPES.add("int");
+
+      LONG_TYPES.add(Long.class.getName());
+      LONG_TYPES.add("long");
+
+      DOUBLE_TYPES.add(Double.class.getName());
+      DOUBLE_TYPES.add("double");
+
+      FLOAT_TYPES.add(Float.class.getName());
+      FLOAT_TYPES.add("float");
+
+      STRING_TYPES.add(String.class.getName());
+      
+  }
   // the name of the operation to invoke
   private String _operationName;
 
@@ -122,6 +143,7 @@ public class OperationCall
     if (results.size() < _keys.size()) {
       _logger.warn("insufficient result size");
     }
+    
     
     Iterator<String> keyIter = _keys.iterator();
     for (Object result : results) {
@@ -251,10 +273,18 @@ public class OperationCall
     if ("".equals(types)) {
       paramTypes = new String[] { };
     }
+    for(int i =0; i<paramTypes.length; i++)
+    {
+        paramTypes[i] = paramTypes[i].trim();
+    }
 
-    // FIXME: marshal String to Object[] representations
-    Object[] paramValues = new Object[] { };
 
+    Object[] paramValues = new Object[] {};
+    String values = (String) config.get(OPERATION_PARAM_VALUES);
+    if (values != null && !"".equals(values.trim())) {
+        String[] params = values.split(DELIMITER);
+        paramValues = createParamValues(params, paramTypes);
+    }
     // ugly form of downcasting...  but XML-RPC doesn't give us a List<String>
     List<String> keys = Utility.downcast((Object[]) config.get(DATA_POINT));
     _logger.debug("keys: " + keys);
@@ -276,7 +306,43 @@ public class OperationCall
     return call;
   }
 
+  private static Object[] createParamValues(String[] params,
+          String[] paramTypes) throws ConfigurationException {
+      if (params.length != paramTypes.length) {
+          throw new ConfigurationException("number of parameter types and "
+                  + "parameter values does not match");
+      }
+      Object[] values = new Object[params.length];
+      for (int i = 0; i < params.length; i++) {
 
+          String type = paramTypes[i].trim();
+          String valueStr = params[i].trim();
+          Object resultValue = null;
+          try {
+              if (INT_TYPES.contains(type)) {
+                  resultValue = Integer.valueOf(valueStr);
+              } else if (DOUBLE_TYPES.contains(type)) {
+                  resultValue = Double.valueOf(valueStr);
+              } else if (LONG_TYPES.contains(type)) {
+                  resultValue = Long.valueOf(valueStr);
+              } else if (FLOAT_TYPES.contains(type)) {
+                  resultValue = Float.valueOf(valueStr);
+              } else if (STRING_TYPES.contains(type)) {
+                  resultValue = valueStr;
+              } else {
+                  throw new ConfigurationException("Type " + type
+                          + " is not handled for operation calls");
+              }
+          } catch (NumberFormatException e) {
+              throw new ConfigurationException(String.format(
+                      "value %1$s could not be converted to %2$s", valueStr,
+                      type));
+          }
+          values[i] = resultValue;
+      }
+
+      return values;
+  }
   /**
    * Returns the name of the operation to invoke
    */
