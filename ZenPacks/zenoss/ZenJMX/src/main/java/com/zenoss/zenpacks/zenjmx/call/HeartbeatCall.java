@@ -49,18 +49,12 @@ public class HeartbeatCall
    * Creates a HeartbeatCall
    */
   public HeartbeatCall() {
-    try {
-      // use localhost as the device we'll report against
-      InetAddress address = InetAddress.getLocalHost();
-      _device = address.getCanonicalHostName();
-    } catch (UnknownHostException e) {
-      // this should never happen
-      _logger.error("unexpected error getting address for localhost", e);
-    }
+    Configuration config = Configuration.instance();
 
+	// use the confName as the device portion of the heartbeat
+	_device = config.getProperty(CONF_NAME);
 
     // use the component name from the configuration
-    Configuration config = Configuration.instance();
     _component = config.getProperty(COMPONENT_NAME);
   }
 
