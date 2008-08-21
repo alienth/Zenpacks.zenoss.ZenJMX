@@ -43,7 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * @version $Revision: 1.6 $
  */
 public abstract class JmxCall
-  implements Callable {
+{
 
   // configuration common to all calls
   public static String JMX_PORT = "jmxPort";
@@ -57,9 +57,6 @@ public abstract class JmxCall
 
   
   // configuration...
-  boolean _authenticate;
-  String _username;
-  String _password;
   String _objectName;
 
   // time when the call started (in ms since the epoch)
@@ -68,8 +65,6 @@ public abstract class JmxCall
   // summary bean used for passing results to the Processor
   Summary _summary;
   
-  // client to the agent
-  JmxClient _client;
 
   
   /**
@@ -82,40 +77,15 @@ public abstract class JmxCall
    * @param attrKey the key of the attribute to return (only valid for
    * multi-value attributes)
    */
-  public JmxCall(String url,
-                 boolean authenticate,
-                 String username,
-                 String password,
-                 String objectName) {
-    _client = new JmxClient(url);
+  public JmxCall(String objectName) {
     _summary = new Summary();
     _summary.setObjectName(objectName);
   
-    _authenticate = authenticate;
-    _username = username;
-    _password = password;
 
     _objectName = objectName;
   }
 
-
-  /**
-   * Returns a boolean that indicates whether or not authentication
-   * should be attempted.
-   */
-  public boolean getAuthenticate() { return _authenticate; }
-
-
-  /**
-   * Returns the username used to authentication.
-   */
-  public String getUsername() { return _username; }
-
-
-  /**
-   * Returns the password used to authentication.
-   */
-  public String getPassword() { return _password; }
+  abstract public Summary call(JmxClient client) throws JmxException;
 
 
   /**
@@ -178,21 +148,6 @@ public abstract class JmxCall
     return typeMap;
   }
 
-
-  /**
-   * Optionally authenticates, throwing an Exception if authentication
-   * fails
-   * @throws IOException if authentication is unsuccessful
-   */
-  void setCredentials() {
-    // set credential information 
-    if (_authenticate) {
-      String[] creds = new String[] { _username, _password };
-      _client.setCredentials(creds);
-    }
-  }
-
-
   /**
    * @see Object#equals
    */
@@ -205,8 +160,6 @@ public abstract class JmxCall
 
     JmxCall call = (JmxCall) other;
 
-    toReturn &= call.getUsername().equals(getUsername());
-    toReturn &= call.getPassword().equals(getPassword());
     toReturn &= call.getObjectName().equals(getObjectName());
     toReturn &= call.getSummary().equals(getSummary());
 
@@ -230,8 +183,6 @@ public abstract class JmxCall
   public int hashCode() {
     int hc = 0;
 
-    hc += hashCode(_username);
-    hc += hashCode(_password);
     hc += hashCode(_objectName);
     hc += hashCode(_summary.getDataSourceId());
     hc += hashCode(_summary.getDeviceId());

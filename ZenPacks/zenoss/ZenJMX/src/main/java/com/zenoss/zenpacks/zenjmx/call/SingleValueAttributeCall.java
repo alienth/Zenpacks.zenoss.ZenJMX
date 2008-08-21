@@ -12,16 +12,17 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.List;
 import java.util.HashMap;
-
-import static com.zenoss.zenpacks.zenjmx.call.JmxCall.*;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.zenoss.jmx.JmxClient;
+import com.zenoss.jmx.JmxException;
+import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
 
 
 /**
@@ -52,14 +53,10 @@ public class SingleValueAttributeCall
   /**
    * Creates a SingleAttributeCall
    */
-  public SingleValueAttributeCall(String url,
-                                  boolean authenticate,
-                                  String username,
-                                  String password,
-                                  String objectName,
+  public SingleValueAttributeCall(String objectName,
                                   String attrName,
                                   String attrType) {
-    super(url, authenticate, username, password, objectName);
+    super(objectName);
 
     _attrName = attrName;
 
@@ -78,23 +75,17 @@ public class SingleValueAttributeCall
 
   
   /**
-   * @see Callable#call
+   * @throws JmxException 
+ * @see Callable#call
    */
-  public Summary call() 
-    throws Exception {
-    try{    // connect to the agent
+  public Summary call(JmxClient client) throws JmxException {
       // record when we started
       _startTime = System.currentTimeMillis();
-
-      setCredentials();
-    
-      _client.connect();
     
       // issue the query
-
         _logger.debug("in test code");
-      Object result = _client.query(_objectName, _attrName);
-      _client.close();
+      Object result = client.query(_objectName, _attrName);
+      
     
       // marshal the results
       Map<String, Object> values = new HashMap<String, Object>();
@@ -109,39 +100,29 @@ public class SingleValueAttributeCall
 
         // return result
       return _summary;
-    }finally{
-       //disconnect from the agent.
-      _client.close();
-    }
+    
   }
 
 
   /**
    * Creates a SingleValueAttributeCall from the configuration provided
    */
-  public static SingleValueAttributeCall fromValue(Map config) 
+  public static SingleValueAttributeCall fromValue(ConfigAdapter config) 
     throws ConfigurationException {
 
-    String url = Utility.getUrl(config);
-    boolean auth = false;
-    if (config.containsKey(AUTHENTICATE)) {
-       auth = ((Boolean)config.get(AUTHENTICATE)).booleanValue();
-    }
     
-    List<String> types = Utility.downcast((Object[]) config.get(TYPES));
+    List<String> types = config.getDataPointTypes();
     String type = "";
     if (types.size() > 0) {
       type = types.iterator().next();
     }
 
     SingleValueAttributeCall call = 
-      new SingleValueAttributeCall(url,
-                                   auth,
-                                   Utility.getUsername(config),
-                                   Utility.getPassword(config),
-                                   (String) config.get(OBJECT_NAME),
-                                   (String) config.get(ATTRIBUTE_NAME),
+      new SingleValueAttributeCall(config.getOjectName(),
+                                   config.getAttributeName(),
                                    type);
+    call.setDeviceId(config.getDevice());
+    call.setDataSourceId(config.getDatasourceId());
     return call;
   }
 

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
+
 
 /**
  * <p> Commonly used methods.  </p>
@@ -60,35 +62,22 @@ public class Utility {
    * @throws ConfigurationException if the url is invalid (if the hostname 
    *         or port cannot be found in the configuration)
    */
-  public static String getUrl(Map config) 
+  public static String getUrl(ConfigAdapter config) 
     throws ConfigurationException {
 
-    String port = get(config, "jmxPort", "zJmxManagementPort");
-    String rmiContext = get(config, "rmiContext", null);
+    String port = config.getJmxPort();
+    String rmiContext = config.getRmiContext();
     if(rmiContext == null || "".equals(rmiContext)){
         rmiContext = "jmxrmi";  //default context for mbean server
     }
-    String protocol = get(config, "jmxProtocol", null);
+    String protocol = config.getJmxProtocol();
     if ("".equals(port)) {
       String message = "jmxPort or zJmxManagementPort not specified";
       throw new ConfigurationException(message);
     }
 
-    String hostAddr = null;
-    
-    if (config.containsKey("manageIp")) {
-       _logger.debug("using manageIp for host address");
-       hostAddr = (String) config.get("manageIp");
-    } else {
-      /*
-       * Support pre-2.1.3+ hub xml-rpc responses. If manageIp is not
-       * present in configuration, fallback to device, which will have
-       * a better chance of working than null.
-       */
-        _logger.debug("manageIp not in config, using device for host address");
-        hostAddr = (String) config.get("device"); 
-    }
-    
+    String hostAddr = config.getManageIp();
+     
     if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
       String message = "manageIp or device properties not specified";
       throw new ConfigurationException(message);

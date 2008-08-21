@@ -1,14 +1,14 @@
 ################################
 # These variables are overwritten by Zenoss when the ZenPack is exported
 # or saved.  Do not modify them directly here.
-NAME = 'ZenPacks.zenoss.ZenJMX'
-VERSION = '2.1.1'
-AUTHOR = 'Zenoss'
-LICENSE = ''
+NAME = "ZenPacks.zenoss.ZenJMX"
+VERSION = "3.0"
+AUTHOR = "Zenoss"
+LICENSE = ""
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 INSTALL_REQUIRES = []
-COMPAT_ZENOSS_VERS = '2.2'
-PREV_ZENPACK_NAME = 'ZenJMX'
+COMPAT_ZENOSS_VERS = ">=2.2.0"
+PREV_ZENPACK_NAME = "ZenJMX"
 # STOP_REPLACEMENTS
 ################################
 # Zenoss will not overwrite any changes you make below here.

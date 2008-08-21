@@ -21,6 +21,8 @@ import static com.zenoss.zenpacks.zenjmx.call.SingleValueAttributeCall.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
+
 
 /**
  * <p> Factory to produce JmxCalls based on the JMX QueryType value
@@ -36,7 +38,7 @@ public class CallFactory {
   // configuration items (keys) in the config returned from the server
   public static final String DATA_POINT = "dps";
   public static final String DEVICE_ID = "device";
-  public static final String DATASOURCE_ID = "id";
+  public static final String DATASOURCE_ID = "datasourceId";
 
   // logger
   private static final Log _logger = LogFactory.getLog(CallFactory.class);
@@ -47,53 +49,44 @@ public class CallFactory {
    */
   private CallFactory() { }
 
-
   /**
    * Creates a JmxCall from a configuration read from the server
    * @param config the name-value parameters from the server
    * @throws ConfigurationException if the configuration provided does not
    *         contain sufficient information to create a call.
    */
-  public static JmxCall createCall(Map config) 
-    throws ConfigurationException {
+  public static JmxCall createCall(ConfigAdapter config) 
+      throws ConfigurationException {
+      
+      _logger.debug("config: " + config);
 
-    _logger.debug("config: " + config);
+      List<String>dataPoints = config.getDataPoints();
+      if (dataPoints.isEmpty()) {
+          _logger.warn("no data points defined");
+          throw new ConfigurationException("No datapoints defined; " +
+                          "will not run collections");
+      }
 
-    Object[] datapoints = (Object[]) config.get(DATA_POINT);
-    if (datapoints == null) {
-      _logger.warn("no data points defined");
-      return null;
-    }
+      // the id of the device we will query
+      String deviceId = config.getDevice();
 
-    // the id of the device we will query
-    String deviceId = (String) config.get(DEVICE_ID);
+      // the id of the data source
+      String dataSourceId = config.getDatasourceId();
 
-    // the id of the data source
-    String dataSourceId = (String) config.get(DATASOURCE_ID);
-
-    // if the attributeName is blank the configuration represents an operation
-    String attributeName = (String) config.get(ATTRIBUTE_NAME);
-    if ("".equals(attributeName)) {
-      _logger.debug("creating an operation call");
-      JmxCall call = OperationCall.fromValue(config);
-      call.setDeviceId(deviceId);
-      call.setDataSourceId(dataSourceId);
+      // if the attributeName is blank the configuration represents an operation
+      String attributeName =  config.getAttributeName();
+      JmxCall call = null;
+      if (attributeName.trim().length() == 0) {
+          _logger.debug("creating an operation call");
+          call = OperationCall.fromValue(config);
+      }else if (dataPoints.size() > 1) {
+          _logger.debug("creating a multi-value attribute call");
+          call = MultiValueAttributeCall.fromValue(config);
+      } else {
+          _logger.debug("creating a single value attribute call");
+          call = SingleValueAttributeCall.fromValue(config);
+          }
       return call;
-    }
-
-    if (datapoints.length > 1) {
-      _logger.debug("creating a multi-value attribute call");
-      JmxCall call = MultiValueAttributeCall.fromValue(config);
-      call.setDeviceId(deviceId);
-      call.setDataSourceId(dataSourceId);
-      return call;
-    } else {
-      _logger.debug("creating a single value attribute call");
-      JmxCall call = SingleValueAttributeCall.fromValue(config);
-      call.setDeviceId(deviceId);
-      call.setDataSourceId(dataSourceId);
-      return call;
-    }
   }
 }
 

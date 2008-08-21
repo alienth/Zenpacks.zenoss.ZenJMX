@@ -25,6 +25,10 @@ import static com.zenoss.zenpacks.zenjmx.call.CallFactory.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.zenoss.jmx.JmxClient;
+import com.zenoss.jmx.JmxException;
+import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
+
 
 /**
  * <p> Call for an operation's output.  Operations are difficult from
@@ -51,7 +55,6 @@ public class OperationCall
   public static final String DELIMITER = ",";
 
 
-  
   private static final Set<String> INT_TYPES = new HashSet<String>();
   private static final Set<String> LONG_TYPES = new HashSet<String>();
   private static final Set<String> DOUBLE_TYPES = new HashSet<String>();
@@ -73,6 +76,7 @@ public class OperationCall
       STRING_TYPES.add(String.class.getName());
       
   }
+
   // the name of the operation to invoke
   private String _operationName;
 
@@ -92,17 +96,13 @@ public class OperationCall
   /**
    * Creates a OperationCall
    */
-  public OperationCall(String url,
-                       boolean authenticate,
-                       String username,
-                       String password,
-                       String objectName,
+  public OperationCall(String objectName,
                        String operationName,
                        Object[] paramValues,
                        String[] paramTypes,
                        List<String> keys,
                        List<String> types) {
-    super(url, authenticate, username, password, objectName);
+    super(objectName);
 
     _operationName = operationName;
     _values = paramValues;
@@ -225,86 +225,61 @@ public class OperationCall
   /**
    * @see Callable#call
    */
-  public Summary call()
-    throws Exception {
+  public Summary call(JmxClient client)
+    throws JmxException{
 
-    try{
-        // record when we started
-        _startTime = System.currentTimeMillis();
-    
-        setCredentials();
-        
-        // connect to the agent
-        _client.connect();
-        
-        // issue the query
-        Object result = _client.invoke(_objectName, _operationName, 
+      // record when we started
+      _startTime = System.currentTimeMillis();
+      // issue the query
+      Object result = client.invoke(_objectName, _operationName, 
                                        _values, _types);
-        
-        _summary.setResults(marshal(result));
+      _summary.setResults(marshal(result));
     
-        // record the runtime of the call
-        _summary.setRuntime(System.currentTimeMillis() - _startTime);
+      // record the runtime of the call
+      _summary.setRuntime(System.currentTimeMillis() - _startTime);
     
-        // set our id so the processor can remove it from the reactor
-        _summary.setCallId(hashCode());
-        
-        return _summary;
-    }finally{
-        _client.close();
-    }
+      // set our id so the processor can remove it from the reactor
+      _summary.setCallId(hashCode());
+      
+      return _summary;
   }
 
 
   /**
    * Creates a OperationCall from the configuration provided
    */
-  public static OperationCall fromValue(Map config) 
+  public static OperationCall fromValue(ConfigAdapter config) 
     throws ConfigurationException {
 
     String url = Utility.getUrl(config);
-    boolean auth = false;
-    if (config.containsKey(AUTHENTICATE)) {
-       auth = ((Boolean)config.get(AUTHENTICATE)).booleanValue();
-    }
+    boolean auth = config.authenticate();
     
-    String types = (String) config.get(OPERATION_PARAM_TYPES);
-    String[] paramTypes = types.split(DELIMITER);
-    if ("".equals(types)) {
-      paramTypes = new String[] { };
-    }
-    for(int i =0; i<paramTypes.length; i++)
-    {
-        paramTypes[i] = paramTypes[i].trim();
-    }
-
+    String[] paramTypes = config.getOperationParamTypes();
 
     Object[] paramValues = new Object[] {};
-    String values = (String) config.get(OPERATION_PARAM_VALUES);
-    if (values != null && !"".equals(values.trim())) {
-        String[] params = values.split(DELIMITER);
-        paramValues = createParamValues(params, paramTypes);
-    }
-    // ugly form of downcasting...  but XML-RPC doesn't give us a List<String>
-    List<String> keys = Utility.downcast((Object[]) config.get(DATA_POINT));
+    String[] params =  config.getOperationParamValues();
+    paramValues = createParamValues(params, paramTypes);
+
+    List<String> keys = config.getDataPoints();
     _logger.debug("keys: " + keys);
 
-    List<String> rrdTypes = Utility.downcast((Object[]) config.get(TYPES));
+    List<String> rrdTypes = config.getDataPointTypes();
 
     OperationCall call = 
-      new OperationCall(url,
-                        auth,
-                        Utility.getUsername(config),
-                        Utility.getPassword(config),
-                        (String) config.get(OBJECT_NAME),
-                        (String) config.get(OPERATION_NAME),
+      new OperationCall(config.getOjectName(),
+                        config.getOperationName(),
                         paramValues,
                         paramTypes,
                         keys,
                         rrdTypes);
+    call.setDeviceId(config.getDevice());
+    call.setDataSourceId(config.getDatasourceId());
 
     return call;
   }
+  
+  
+  
 
   private static Object[] createParamValues(String[] params,
           String[] paramTypes) throws ConfigurationException {

@@ -25,6 +25,10 @@ import static com.zenoss.zenpacks.zenjmx.call.CallFactory.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.zenoss.jmx.JmxClient;
+import com.zenoss.jmx.JmxException;
+import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
+
 
 /**
  * <p>
@@ -57,15 +61,11 @@ public class MultiValueAttributeCall
   /**
    * Creates a MultiValueAttributeCall
    */
-  public MultiValueAttributeCall(String url,
-                                 boolean authenticate,
-                                 String username,
-                                 String password,
-                                 String objectName,
+  public MultiValueAttributeCall(String objectName,
                                  String attrName,
                                  List<String> keys,
                                  List<String> types) {
-    super(url, authenticate, username, password, objectName);
+    super(objectName);
 
     _attrName = attrName;
     _keys = keys;
@@ -91,63 +91,50 @@ public class MultiValueAttributeCall
 
 
   /**
-   * @see Callable#call
+   * @throws JmxException 
+ * @see Callable#call
    */
-  public Summary call() 
-    throws Exception {
-    try{
-        // record when we started
-        _startTime = System.currentTimeMillis();
+  public Summary call(JmxClient client) throws JmxException {
+      // record when we started
+      _startTime = System.currentTimeMillis();
+      // issue the query
+      Map<String, Object> values = client.query(_objectName, _attrName, _keys);
+      
+      _summary.setResults(values);
+      
+      // record the runtime of the call
+      _summary.setRuntime(System.currentTimeMillis() - _startTime);
+      
+      // set our id so the processor can remove it from the reactor
+      _summary.setCallId(hashCode());
     
-        setCredentials();
-        
-        // connect to the agent
-        _client.connect();
-        
-        // issue the query
-        Map<String, Object> values = _client.query(_objectName, _attrName, _keys);
-        
-        _summary.setResults(values);
-        
-        // record the runtime of the call
-        _summary.setRuntime(System.currentTimeMillis() - _startTime);
+      // return result
+      return _summary;
     
-        // set our id so the processor can remove it from the reactor
-        _summary.setCallId(hashCode());
-    
-        // return result
-        return _summary;
-    }finally{
-        _client.close();
-    }
   }
 
 
   /**
    * Creates a MultiValueAttributeCall from the configuration provided
    */
-  public static MultiValueAttributeCall fromValue(Map config) 
+  public static MultiValueAttributeCall fromValue(ConfigAdapter  config) 
     throws ConfigurationException {
 
     String url = Utility.getUrl(config);
-    boolean auth = false;
-    if (config.containsKey(AUTHENTICATE)) {
-       auth = ((Boolean)config.get(AUTHENTICATE)).booleanValue();
-    }
+    boolean auth = config.authenticate();
 
     // ugly form of downcasting...  but XML-RPC doesn't give us a List<String>
-    List<String> keys = Utility.downcast((Object[]) config.get(DATA_POINT));
-    List<String> types = Utility.downcast((Object[]) config.get(TYPES));
+    List<String> keys = config.getDataPoints();
+    List<String> types = config.getDataPointTypes();
 
     MultiValueAttributeCall call = 
-      new MultiValueAttributeCall(url,
-                                  auth,
-                                  Utility.getUsername(config),
-                                  Utility.getPassword(config),
-                                  (String) config.get(OBJECT_NAME),
-                                  (String) config.get(ATTRIBUTE_NAME),
+      new MultiValueAttributeCall(config.getOjectName(),
+                                  config.getAttributeName(),
                                   keys,
                                   types);
+    
+    call.setDeviceId(config.getDevice());
+    call.setDataSourceId(config.getDatasourceId());
 
     return call;
   }
