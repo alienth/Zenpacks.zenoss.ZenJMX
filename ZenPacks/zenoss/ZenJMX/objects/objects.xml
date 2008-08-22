@@ -25,6 +25,12 @@ JMX
 <property type="string" id="jmxPort" mode="w" >
 12346
 </property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
+</property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Memory
 </property>
@@ -71,6 +77,12 @@ JMX
 </property>
 <property type="string" id="jmxPort" mode="w" >
 12346
+</property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
 </property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Memory
@@ -119,6 +131,12 @@ JMX
 <property type="string" id="jmxPort" mode="w" >
 12346
 </property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
+</property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=OperatingSystem
 </property>
@@ -157,6 +175,12 @@ JMX
 </property>
 <property type="string" id="jmxPort" mode="w" >
 12346
+</property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
 </property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Threading
@@ -475,6 +499,12 @@ JMX
 <property type="string" id="jmxPort" mode="w" >
 11111
 </property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
+</property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Memory
 </property>
@@ -521,6 +551,12 @@ JMX
 </property>
 <property type="string" id="jmxPort" mode="w" >
 11111
+</property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
 </property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Memory
@@ -569,6 +605,12 @@ JMX
 <property type="string" id="jmxPort" mode="w" >
 11111
 </property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
+</property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=OperatingSystem
 </property>
@@ -607,6 +649,12 @@ JMX
 </property>
 <property type="string" id="jmxPort" mode="w" >
 11111
+</property>
+<property type="string" id="jmxProtocol" mode="w" >
+RMI
+</property>
+<property type="string" id="rmiContext" mode="w" >
+jmxrmi
 </property>
 <property type="string" id="objectName" mode="w" >
 java.lang:type=Threading
@@ -899,5 +947,10 @@ AVERAGE
 </tomanycont>
 </object>
 </tomanycont>
+</object>
+<!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Jmx') -->
+<object id='/zport/dmd/Events/Status/Jmx' module='Products.ZenEvents.EventClass' class='EventClass'>
+<object id='Connection' module='Products.ZenEvents.EventClass' class='EventClass'>
+</object>
 </object>
 </objects>

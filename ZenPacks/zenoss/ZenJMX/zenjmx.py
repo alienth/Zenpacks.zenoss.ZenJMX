@@ -61,7 +61,6 @@ class ZenJMX(RRDDaemon):
         ]
 
     def __init__(self):
-        self.javaProcess = ZenJmxJavaClient()
         RRDDaemon.__init__(self, 'zenjmx')
         #map of deviceId -> JMXDeviceConfig
         self.deviceConfigs = {}
@@ -83,6 +82,10 @@ class ZenJMX(RRDDaemon):
             self.log.debug("startZenjmx(): %s" % result)
             drive(configTask).addCallbacks(self.runCollection, self.errorStop)
         
+        args = None
+        if self.options.configfile:
+            args = ("--configfile", self.options.configfile)
+        self.javaProcess = ZenJmxJavaClient(args)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
         running.addCallback(startZenjmx)
@@ -191,10 +194,9 @@ class ZenJMX(RRDDaemon):
                     self.storeRRD(deviceId, dsId, dpId, value)
                     if not self.jmxConnUp.get(mbeanServerKey, False):
                         self.sendEvent({},
-                                       severity = Event.Info,
+                                       severity = Event.Clear,
                                        component = connectionComponentKey,
                                        eventClass = "/Status/JMX/Connection",
-                                       eventKey = "Up",
                                        summary = "Connection is up",
                                        device = deviceId)
                     self.jmxConnUp[mbeanServerKey] = True
@@ -205,7 +207,7 @@ class ZenJMX(RRDDaemon):
                                    % result)
                     #default component to use
                     evt = self.createEvent(result, connectionComponentKey)
-                    self.sendEvent(evt, severity=Event.Error)
+                    self.sendEvent(evt, severity=Event.Warning)
                     self.jmxConnUp[mbeanServerKey] = False
             
         mbeanServerKey = ""
@@ -339,13 +341,15 @@ class ZenJmxJavaClient(ProcessProtocol):
     protocol to control the zenjmxjava process
     """
 
-    def __init__(self):
+    def __init__(self, args):
         self.deferred = Deferred()
         self.stopCalled = False
         self.process = None
         self.outReceived = sys.stdout.write
         self.errReceived = sys.stderr.write
         self.log = logging.getLogger("zen.ZenJmxJavaClient")
+        self.args = args
+        
 
     def processEnded(self, reason):
         self.log.debug("processEnded():zenjmxjava process ended %s" % reason)
@@ -397,9 +401,11 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.log.info("run():starting zenjmxjava")
         zenjmxjavacmd = "zenjmxjava"
         zenjmxjavacmd = binPath(zenjmxjavacmd)
-        args = 'run'
-        cmd =(zenjmxjavacmd, args)
-        self.log.debug("run():spawn process %s %s" % cmd)
+        args = ("run",)
+        if(self.args):
+            args = args + self.args
+        cmd =(zenjmxjavacmd,)+args
+        self.log.debug("run():spawn process %s" % (cmd,))
         self.deferred = Deferred()
         self.process = reactor.spawnProcess(self, zenjmxjavacmd, cmd, env=None)
         return self.deferred

@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -195,7 +194,6 @@ public class ZenJmxService {
             HashMap<String, String> error = createError(deviceId, msg + ":"
                     + e.getMessage());
             error.put(ConfigAdapter.EVENT_CLASS, "/Status/JMX/Connection");
-            error.put(ConfigAdapter.EVENT_KEY, "Down");
             return error;
 
         }
