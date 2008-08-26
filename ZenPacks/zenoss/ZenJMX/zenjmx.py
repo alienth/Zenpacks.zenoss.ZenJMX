@@ -272,6 +272,7 @@ class ZenJMX(RRDDaemon):
     def runCollection(self, result = None):
         
         def doCollection(driver):
+            self.heartbeat()
             #Schedule for later
             self.log.debug("doCollection(): starting collection cycle")
             reactor.callLater(self.configCycleInterval, self.runCollection)
