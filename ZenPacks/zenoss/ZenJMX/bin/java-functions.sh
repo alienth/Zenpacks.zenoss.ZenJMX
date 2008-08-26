@@ -52,7 +52,7 @@ jmx_args() {
 }
 
 run() {
-    java \
+    exec java \
         ${JVM_ARGS} \
         -cp ${CLASSPATH} \
         ${MAIN_CLASS} \
