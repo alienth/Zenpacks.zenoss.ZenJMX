@@ -59,7 +59,6 @@ class ZenJMX(RRDDaemon):
     initialServices = RRDDaemon.initialServices + [
         'ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService'
         ]
-
     def __init__(self):
         RRDDaemon.__init__(self, 'zenjmx')
         #map of deviceId -> JMXDeviceConfig
@@ -76,15 +75,18 @@ class ZenJMX(RRDDaemon):
             yield self.fetchConfig()
             driver.next()
             driveLater(self.configCycleInterval, configTask)
-        self.log.debug("connected(): zenjmxjavaport is "+ str(self.options.zenjmxjavaport))
         
         def startZenjmx(result):
             self.log.debug("startZenjmx(): %s" % result)
             drive(configTask).addCallbacks(self.runCollection, self.errorStop)
         
+        self.log.debug("connected(): zenjmxjavaport is %s" % \
+                       self.options.zenjmxjavaport)
         args = None
         if self.options.configfile:
             args = ("--configfile", self.options.configfile)
+        if self.options.zenjmxjavaport:
+            args = args + ("-zenjmxjavaport", str(self.options.zenjmxjavaport))
         self.javaProcess = ZenJmxJavaClient(args)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
