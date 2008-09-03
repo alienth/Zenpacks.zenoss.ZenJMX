@@ -151,8 +151,8 @@ class ZenJMXConfigService(PerformanceConfig):
         """
         deviceConfig = None
         for template in device.getRRDTemplates():
-            for ds in template.getRRDDataSources():
-                if ds.sourcetype == 'JMX':
+            for ds in template.getRRDDataSources('JMX'):
+                if ds.enabled:
                     if not deviceConfig:
                         deviceConfig = JMXDeviceConfig(device)
                     deviceConfig.add(
