@@ -41,6 +41,7 @@ from Products.ZenRRD.Thresholds import Thresholds
 from Products.ZenUtils.NJobs import NJobs
 from Products.ZenUtils.Utils import binPath
 from Products.ZenUtils.Driver import drive, driveLater
+import ZenPacks.zenoss.ZenJMX
 
 
 from ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService import JMXDataSourceConfig
@@ -404,8 +405,8 @@ class ZenJmxJavaClient(ProcessProtocol):
         if(self.stopCalled):
             return
         self.log.info("run():starting zenjmxjava")
-        zenjmxjavacmd = "zenjmxjava"
-        zenjmxjavacmd = binPath(zenjmxjavacmd)
+        zenjmxjavacmd = os.path.join(
+                        ZenPacks.zenoss.ZenJMX.binDir, 'zenjmxjava')
         args = ("run",)
         if(self.args):
             args = args + self.args

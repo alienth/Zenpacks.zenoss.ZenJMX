@@ -28,6 +28,7 @@ libDir = os.path.join(os.path.dirname(__file__), 'lib')
 if os.path.isdir(libDir):
     sys.path.append(libDir)
 
+binDir = os.path.join(os.path.dirname(__file__), 'bin')
 
 class ZenPack(ZenPackBase):
     "ZenPack Loader that loads zProperties used by ZenJMX"
