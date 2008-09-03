@@ -14,6 +14,7 @@ package com.zenoss.zenpacks.zenjmx;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,6 +23,8 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.xmlrpc.webserver.XmlRpcServlet;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
@@ -31,6 +34,11 @@ import org.mortbay.jetty.servlet.ServletHolder;
 
 public class ZenJmxMain {
 
+    private static String ERROR = "40";
+    private static String WARNING = "30";
+    private static String INFO = "20";
+    private static String DEBUG = "10";
+    
     // logger
     private static final Log _logger = LogFactory.getLog(ZenJmxMain.class);
 
@@ -39,8 +47,29 @@ public class ZenJmxMain {
      */
     public static void main(String[] args) throws Exception {
 
+        HashMap<String, Level> loggingLevel = new HashMap<String, Level>();
+        loggingLevel.put(ERROR, Level.ERROR);
+        loggingLevel.put(WARNING, Level.WARN);
+        loggingLevel.put(INFO, Level.INFO);
+        loggingLevel.put(DEBUG, Level.DEBUG);
+        
         Configuration config = Configuration.instance();
         parseArguments(config, args);
+        
+        if(config.propertyExists(OptionsFactory.LOG_SEVERITY))
+            {
+            String levelOpt = config.getProperty(OptionsFactory.LOG_SEVERITY);
+            Level level = loggingLevel.get(levelOpt);
+            if(level != null)
+                {
+                Logger.getRootLogger().setLevel(level);
+                }
+            else
+                {
+                _logger.warn("Ignoring unknown log severity "+levelOpt);
+                }
+            }
+        
         String port = config.getProperty(OptionsFactory.LISTEN_PORT,
                 OptionsFactory.DEFAULT_LISTENPORT);
 
@@ -94,6 +123,7 @@ public class ZenJmxMain {
 
         // interrogate the options and get the argument values
         overrideProperty(config, cmd, OptionsFactory.LISTEN_PORT);
+        overrideProperty(config, cmd, OptionsFactory.LOG_SEVERITY);
 
         // tell the user about the arguments
         _logger.info("zenjmxjava configuration:");

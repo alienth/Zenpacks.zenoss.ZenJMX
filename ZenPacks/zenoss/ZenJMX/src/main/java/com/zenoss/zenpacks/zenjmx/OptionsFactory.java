@@ -30,7 +30,8 @@ public class OptionsFactory {
   // configuration options
   public static final String LISTEN_PORT = "zenjmxjavaport";
   public static final String CONFIG_FILE = "configfile";
-
+  public static final String LOG_SEVERITY = "v";
+  
   // default values (also set in zenjmx.conf)
   public static final String DEFAULT_LISTENPORT = "9988";
 
@@ -67,7 +68,7 @@ public class OptionsFactory {
     // everything is treated as an optional argument
     o.addOption(createOption(CONFIG_FILE, true,  "configuration file"));
     o.addOption(createOption(LISTEN_PORT, true,  "Port to listen for requests"));
-    
+    o.addOption(createOption(LOG_SEVERITY, true,  "Severity for logging"));
     return o;
   }
 

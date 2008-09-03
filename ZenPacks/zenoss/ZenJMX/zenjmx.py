@@ -87,6 +87,8 @@ class ZenJMX(RRDDaemon):
             args = ("--configfile", self.options.configfile)
         if self.options.zenjmxjavaport:
             args = args + ("-zenjmxjavaport", str(self.options.zenjmxjavaport))
+        if self.options.logseverity:
+            args = args + ("-v", str(self.options.logseverity))
         self.javaProcess = ZenJmxJavaClient(args)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
