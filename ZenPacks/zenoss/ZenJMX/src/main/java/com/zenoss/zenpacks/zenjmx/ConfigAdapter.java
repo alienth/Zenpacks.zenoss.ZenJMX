@@ -15,6 +15,7 @@ public class ConfigAdapter {
     public static final String OPERATION_NAME = "operationName";
     public static final String JMX_PROTOCOL = "jmxProtocol";
     public static final String JMX_PORT = "jmxPort";
+    public static final String JMX_RAW_SERVICE = "jmxRawService";
     public static final String AUTHENTICATE = "authenticate";
     public static final String MANAGE_IP = "manageIp";
     public static final String DATASOURCE_ID = "datasourceId";
@@ -60,6 +61,10 @@ public class ConfigAdapter {
 
     public String getJmxPort() {
         return (String) configMap.get("jmxPort");
+    }
+
+    public String getJmxRawService() {
+        return (String) configMap.get("jmxRawService");
     }
 
     public Boolean authenticate() {

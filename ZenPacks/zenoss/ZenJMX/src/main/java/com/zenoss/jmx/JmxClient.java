@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.io.IOException;
 
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.TabularDataSupport;
 
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.JMXConnector;
@@ -276,27 +277,63 @@ public class JmxClient {
                                    List<String> keys) 
     throws JmxException {
 
+    _logger.debug("using the following keys: " + keys);
+    _logger.debug("using the following attribute: " + attribute);
+    _logger.debug("using the following string: " + objectName);
+
     // issue the query
     Object multiValue = query(objectName, attribute);
 
-    // if the attribute wasn't multi-value just return the attribute
-    if (! (multiValue instanceof CompositeDataSupport)) {
-      Map<String, Object> values = new HashMap<String, Object>();
-      values.put(keys.iterator().next(), multiValue);
-      return values;
-    }
-
-    // cast the Object to a CompositeDataSupport so we can work with it
-    CompositeDataSupport composite = (CompositeDataSupport) multiValue;
-
     // marshal composite values into 
-    Map<String, Object> values = new HashMap<String, Object>();
-    for (String key : keys) {
-      if (! composite.containsKey(key)) {
-        _logger.warn("key '" + key + "' not found.");
-      }
-      
-      values.put(key, composite.get(key));
+    Map<String, Object> values = null; 
+
+    //CompositeData 
+    if (multiValue instanceof CompositeDataSupport) {
+        _logger.debug("dealing with composite data");
+        // cast the Object to a CompositeDataSupport so we can work with it
+        CompositeDataSupport composite = (CompositeDataSupport) multiValue;
+
+        values = new HashMap<String, Object>();
+        for (String key : keys) {
+           if (! composite.containsKey(key)) 
+                _logger.warn("DataPoint '" + key + "' not found.");
+           else
+                values.put(key, composite.get(key));
+        }
+
+    }
+    /*
+     * get ready for tabular data support here
+     *
+    // TabularData
+    else if (multiValue instanceof TabularDataSupport) {
+        _logger.info("dealing with tabular data");
+        _logger.info("multivalue is: " +multiValue.toString());
+
+
+
+        // cast the Object to a CompositeDataSupport so we can work with it
+        TabularDataSupport composite = (TabularDataSupport) multiValue;
+
+        _logger.info("keys are: " +composite.keySet().toString());
+        _logger.info("entries are: " +composite.entrySet().toString());
+
+
+
+
+        values = new HashMap<String, Object>();
+        for (String key : keys) {
+           if (! composite.containsKey(key)) 
+                _logger.warn("key '" + key + "' not found.");
+           else
+                values.put(key, composite.get(key));
+        }
+    }*/
+    // if the attribute wasn't multi-value just return the attribute
+    else {
+        _logger.debug("dealing with other data");
+        values = new HashMap<String, Object>();
+        values.put(keys.iterator().next(), multiValue);
     }
 
     return values;

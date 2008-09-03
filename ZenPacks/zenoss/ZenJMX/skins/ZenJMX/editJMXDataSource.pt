@@ -125,6 +125,15 @@
                 tal:content="here/rmiContext"/>
         </tr>
         <tr>
+            <td class="tableheader">Raw Service URL (advanced users only)</td>
+            <td class="tablevalues" tal:condition="editable">
+            <input class="tablevalues" type="text" name="jmxRawService:string" size="50"
+                tal:attributes="value here/jmxRawService" />
+            </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/jmxRawService"/>
+        </tr>
+        <tr>
             <td class="tableheader">Object Name</td>
             <td class="tablevalues" tal:condition="editable">
             <input class="tablevalues" type="text" name="objectName:string" size="50"

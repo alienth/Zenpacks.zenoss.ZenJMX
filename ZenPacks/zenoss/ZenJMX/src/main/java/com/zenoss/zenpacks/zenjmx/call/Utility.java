@@ -65,29 +65,42 @@ public class Utility {
   public static String getUrl(ConfigAdapter config) 
     throws ConfigurationException {
 
-    String port = config.getJmxPort();
-    String rmiContext = config.getRmiContext();
-    if(rmiContext == null || "".equals(rmiContext)){
-        rmiContext = "jmxrmi";  //default context for mbean server
-    }
-    String protocol = config.getJmxProtocol();
-    if ("".equals(port)) {
-      String message = "jmxPort or zJmxManagementPort not specified";
-      throw new ConfigurationException(message);
-    }
+    String jmxRawService = config.getJmxRawService();
+    String url = null;
 
-    String hostAddr = config.getManageIp();
-     
-    if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
-      String message = "manageIp or device properties not specified";
-      throw new ConfigurationException(message);
+    // allow users to specify a raw JMX url
+    if (jmxRawService != null && ! jmxRawService.equals("")) {
+        _logger.debug("using JMX Raw URL option");
+        url = jmxRawService;
     }
+    // old fashioned JMX url building
+    else {
+        String port = config.getJmxPort();
+        String rmiContext = config.getRmiContext();
+
+        if(rmiContext == null || "".equals(rmiContext)){
+            rmiContext = "jmxrmi";  //default context for mbean server
+        }
     
-    String url = "service:jmx:";
-    if (protocol.equals("JMXMP"))
-      url += "jmxmp://" + hostAddr + ":" + port;
-    else
-      url += "rmi:///jndi/rmi://" + hostAddr + ":" + port + "/"+ rmiContext;
+        String protocol = config.getJmxProtocol();
+        if ("".equals(port)) {
+            String message = "jmxPort or zJmxManagementPort not specified";
+            throw new ConfigurationException(message);
+        }
+
+        String hostAddr = config.getManageIp();
+     
+        if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
+            String message = "manageIp or device properties not specified";
+            throw new ConfigurationException(message);
+        }
+    
+        url = "service:jmx:";
+        if (protocol.equals("JMXMP"))
+            url += "jmxmp://" + hostAddr + ":" + port;
+        else
+            url += "rmi:///jndi/rmi://" + hostAddr + ":" + port + "/"+ rmiContext;
+    }
 
     _logger.debug("JMX URL is: "+url);
     return url;
