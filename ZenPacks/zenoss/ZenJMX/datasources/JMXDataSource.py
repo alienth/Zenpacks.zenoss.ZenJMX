@@ -65,7 +65,7 @@ class JMXDataSource(ZenPackPersistence, Base):
         {'id':'rmiContext', 'type':'string', 'mode':'w'},
         {'id':'objectName', 'type':'string', 'mode':'w'},
 
-        {'id':'authenticate', 'type':'string', 'mode':'w'},
+        {'id':'authenticate', 'type':'boolean', 'mode':'w'},
         {'id':'username', 'type':'string', 'mode':'w'},
         {'id':'password', 'type':'string', 'mode':'w'},
 
