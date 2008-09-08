@@ -69,6 +69,7 @@ class ZenJMX(RRDDaemon):
         #previous connection state to device's mbean server
         #if no entry then previous state is unknown (usually at startup)
         self.jmxConnUp = {}
+        self.cycleSeconds = 300
 
     def connected(self):
         def configTask(driver):
@@ -90,6 +91,9 @@ class ZenJMX(RRDDaemon):
             args = args + ("-zenjmxjavaport", str(self.options.zenjmxjavaport))
         if self.options.logseverity:
             args = args + ("-v", str(self.options.logseverity))
+        self.log.debug("connected(): cycletime is %s" % self.options.cycletime)
+        self.cycleSeconds = self.options.cycletime * 60
+        self.heartbeatTimeout = self.cycleSeconds* 3
         self.javaProcess = ZenJmxJavaClient(args)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
@@ -133,7 +137,7 @@ class ZenJMX(RRDDaemon):
      
             yield self.model().callRemote('propertyItems')
             self.setPropertyItems(driver.next())
-            self.rrd = RRDUtil(createCommand, DEFAULT_HEARTBEAT_TIME)
+            self.rrd = RRDUtil(createCommand, self.cycleSeconds)
      
             yield self.model().callRemote('getThresholdClasses')
             self.remote_updateThresholdClasses(driver.next())
@@ -280,7 +284,7 @@ class ZenJMX(RRDDaemon):
             self.heartbeat()
             #Schedule for later
             self.log.debug("doCollection(): starting collection cycle")
-            reactor.callLater(self.configCycleInterval, self.runCollection)
+            reactor.callLater(self.cycleSeconds, self.runCollection)
             if not self.options.cycle:
                 self.stop()
             if self.running:
@@ -335,6 +339,11 @@ class ZenJMX(RRDDaemon):
                                default=9988,
                                type='int',
                                help="Port for zenjmxjava process")
+        self.parser.add_option('--cycletime',
+                               dest='cycletime',
+                               default=5,
+                               type='int',
+                               help="Cycle time, in minutes, to run collection")
         
     def stop(self):
         if self.javaProcess:
