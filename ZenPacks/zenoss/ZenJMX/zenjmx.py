@@ -416,7 +416,7 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.log.info("run():starting zenjmxjava")
         zenjmxjavacmd = os.path.join(
                         ZenPacks.zenoss.ZenJMX.binDir, 'zenjmxjava')
-        args = ("run",)
+        args = ("runjmxenabled",)
         if(self.args):
             args = args + self.args
         cmd =(zenjmxjavacmd,)+args

@@ -59,6 +59,15 @@ run() {
         ${RUN_ARGS}
 }
 
+runjmxenabled() {
+    JVM_ARGS=`jmx_args`
+    exec java \
+        ${JVM_ARGS} \
+        -cp ${CLASSPATH} \
+        ${MAIN_CLASS} \
+        ${RUN_ARGS}
+}
+
 start() {
     if running; then    
         echo is already running
@@ -108,6 +117,9 @@ generic() {
     case "$CMD" in
       run)
 	    run "$@"
+	    ;;
+      runjmxenabled)
+	    runjmxenabled "$@"
 	    ;;
       start)
 	    start "$@"
