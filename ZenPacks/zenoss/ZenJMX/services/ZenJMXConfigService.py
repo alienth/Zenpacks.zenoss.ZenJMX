@@ -121,6 +121,10 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
         string key which represents the connection properties that make up 
         the connection properties for the datasource.  
         """
+        # raw service URL is being used
+        if self.jmxRawService:
+            return self.jmxRawService
+
         components = [self.jmxProtocol]
         if self.jmxProtocol == "RMI":
             components.append(self.rmiContext)
