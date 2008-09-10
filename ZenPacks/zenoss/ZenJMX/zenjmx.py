@@ -94,7 +94,7 @@ class ZenJMX(RRDDaemon):
         self.log.debug("connected(): cycletime is %s" % self.options.cycletime)
         self.cycleSeconds = self.options.cycletime
         self.heartbeatTimeout = self.cycleSeconds* 3
-        self.javaProcess = ZenJmxJavaClient(args)
+        self.javaProcess = ZenJmxJavaClient(args, self.options.cycle)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
         running.addCallback(startZenjmx)
@@ -281,12 +281,11 @@ class ZenJMX(RRDDaemon):
     def runCollection(self, result = None):
         
         def doCollection(driver):
-            self.heartbeat()
+            if self.options.cycle:
+                self.heartbeat()
             #Schedule for later
             self.log.debug("doCollection(): starting collection cycle")
             reactor.callLater(self.cycleSeconds, self.runCollection)
-            if not self.options.cycle:
-                self.stop()
             if self.running:
                 self.log.error("last zenjmx collection is still running")
                 return
@@ -321,11 +320,15 @@ class ZenJMX(RRDDaemon):
                 else:
                     self.log.debug("handleFinish(): success %s"
                                   % result)
+            if not self.options.cycle:
+                self.stop()
                     
         def handleError(error):
             self.running = False
             self.log.error("handleError():Error running doCollection: %s"
                            % error.printTraceback())
+            if not self.options.cycle:
+                self.stop()
         d = drive(doCollection)
         d.addCallback(handleFinish)
         d.addErrback(handleError)
@@ -356,7 +359,7 @@ class ZenJmxJavaClient(ProcessProtocol):
     protocol to control the zenjmxjava process
     """
 
-    def __init__(self, args):
+    def __init__(self, args, cycle=True):
         self.deferred = Deferred()
         self.stopCalled = False
         self.process = None
@@ -364,12 +367,14 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.errReceived = sys.stderr.write
         self.log = logging.getLogger("zen.ZenJmxJavaClient")
         self.args = args
+        self.cycle = cycle
         
 
     def processEnded(self, reason):
-        self.log.debug("processEnded():zenjmxjava process ended %s" % reason)
         self.process = None
         if not self.stopCalled:
+            self.log.info("processEnded():zenjmxjava process ended %s" \
+                           % reason)
             if(self.deferred):
                 self.deferred.errback(reason)
             self.deferred = None
@@ -416,7 +421,11 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.log.info("run():starting zenjmxjava")
         zenjmxjavacmd = os.path.join(
                         ZenPacks.zenoss.ZenJMX.binDir, 'zenjmxjava')
-        args = ("runjmxenabled",)
+        if self.cycle:
+            args = ("runjmxenabled",)
+        else:
+            #don't want to start up with jmx server to avoid port conflicts
+            args = ("run",)
         if(self.args):
             args = args + self.args
         cmd =(zenjmxjavacmd,)+args
