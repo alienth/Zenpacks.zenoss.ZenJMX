@@ -25,7 +25,6 @@ install:
 	cd ${LIB_DIR} ; \
 	tar xzf ${TARGET}/*-bin.tar.gz
 
-	cp ${ZENJMX_HOME}/zenjmx.conf ${LIB_DIR}
 	cp ${ZENJMX_HOME}/jmxremote_optional.jar ${LIB_DIR}
 	cp ${ZENJMX_HOME}/src/main/resources/log4j.properties ${LIB_DIR}
 

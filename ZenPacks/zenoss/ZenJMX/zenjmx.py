@@ -92,7 +92,7 @@ class ZenJMX(RRDDaemon):
         if self.options.logseverity:
             args = args + ("-v", str(self.options.logseverity))
         self.log.debug("connected(): cycletime is %s" % self.options.cycletime)
-        self.cycleSeconds = self.options.cycletime * 60
+        self.cycleSeconds = self.options.cycletime
         self.heartbeatTimeout = self.cycleSeconds* 3
         self.javaProcess = ZenJmxJavaClient(args)
         running = self.javaProcess.run()
@@ -341,9 +341,9 @@ class ZenJMX(RRDDaemon):
                                help="Port for zenjmxjava process")
         self.parser.add_option('--cycletime',
                                dest='cycletime',
-                               default=5,
+                               default=300,
                                type='int',
-                               help="Cycle time, in minutes, to run collection")
+                               help="Cycle time, in seconds, to run collection")
         
     def stop(self):
         if self.javaProcess:
