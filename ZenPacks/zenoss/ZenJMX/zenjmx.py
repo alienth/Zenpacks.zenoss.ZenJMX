@@ -73,10 +73,18 @@ class ZenJMX(RRDDaemon):
 
     def connected(self):
         def configTask(driver):
+            startTime = time.time()
             self.log.debug("configTask(): fetching config")
             yield self.fetchConfig()
             driver.next()
+            configTime = time.time() - startTime
+            self.rrdStats.gauge('configTime',
+                            self.configCycleInterval * 60,
+                            configTime)
+            self.log.debug("configTask(): daemon stats config time is %s" 
+                          % configTime)
             driveLater(self.configCycleInterval, configTask)
+            
         
         def startZenjmx(result):
             self.log.debug("startZenjmx(): %s" % result)
@@ -226,7 +234,7 @@ class ZenJMX(RRDDaemon):
             connectionComponentKey = config.getConnectionPropsKey()
             mbeanServerKey = config.getJmxServerKey()
             configMaps.append(toDict(config))
-        self.log.info("collectJmx(): for %s" % connectionComponentKey)
+        self.log.info("collectJmx(): for %s %s" % (config.device, connectionComponentKey))
         return drive(rpcCall)
     
     def createEvent(self, errorMap, component=None):
@@ -286,6 +294,7 @@ class ZenJMX(RRDDaemon):
             #Schedule for later
             self.log.debug("doCollection(): starting collection cycle")
             reactor.callLater(self.cycleSeconds, self.runCollection)
+            startTime = time.time()
             if self.running:
                 self.log.error("last zenjmx collection is still running")
                 return
@@ -306,7 +315,24 @@ class ZenJMX(RRDDaemon):
             yield jobs.start()
             driver.next()
             self.log.debug("doCollection(): exiting collection cycle")
-
+            cycleTime = time.time() - startTime
+            endCycle = self.rrd.endCycle()
+            dataPoints = self.rrd.dataPoints
+            events = []
+            events += self.rrdStats.gauge('cycleTime',
+                                       self.cycleSeconds,
+                                       cycleTime)
+            events += self.rrdStats.counter('dataPoints',
+                                        self.heartbeatTimeout,
+                                        dataPoints)
+            events += self.rrdStats.gauge('cyclePoints',
+                                      self.heartbeatTimeout,
+                                      endCycle)
+            self.sendEvents(events)
+            self.log.debug("doCollection(): daemon stats cycle time is %s" % cycleTime)
+            self.log.debug("doCollection(): daemon stats data points is %s" % dataPoints)
+            self.log.debug("doCollection(): daemon stats end cycle is %s" % endCycle)
+              
         def handleFinish(results):
             self.running = False
             for result in results:
@@ -373,7 +399,7 @@ class ZenJmxJavaClient(ProcessProtocol):
     def processEnded(self, reason):
         self.process = None
         if not self.stopCalled:
-            self.log.info("processEnded():zenjmxjava process ended %s" \
+            self.log.warn("processEnded():zenjmxjava process ended %s" \
                            % reason)
             if(self.deferred):
                 self.deferred.errback(reason)
@@ -411,7 +437,7 @@ class ZenJmxJavaClient(ProcessProtocol):
             self.deferred = None
         if self.deferred:
             #give the java service a chance to startup
-            reactor.callLater(2, doCallback)
+            reactor.callLater(3, doCallback)
         self.log.debug("connectionMade(): done")
             
 
