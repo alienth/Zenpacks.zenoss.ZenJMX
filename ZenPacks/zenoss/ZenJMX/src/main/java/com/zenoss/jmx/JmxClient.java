@@ -12,24 +12,21 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.jmx;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
-
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
-import java.io.IOException;
-
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.TabularDataSupport;
-
-import javax.management.remote.JMXServiceURL;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-
-import javax.management.ObjectName;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -282,60 +279,89 @@ public class JmxClient {
     _logger.debug("using the following string: " + objectName);
 
     // issue the query
-    Object multiValue = query(objectName, attribute);
+    Object value = query(objectName, attribute);
 
     // marshal composite values into 
     Map<String, Object> values = null; 
 
-    //CompositeData 
-    if (multiValue instanceof CompositeDataSupport) {
-        _logger.debug("dealing with composite data");
-        // cast the Object to a CompositeDataSupport so we can work with it
-        CompositeDataSupport composite = (CompositeDataSupport) multiValue;
+    if (value instanceof CompositeDataSupport) {
+      _logger.debug("dealing with composite data");
+      // cast the Object to a CompositeDataSupport so we can work with it
+      CompositeDataSupport composite = (CompositeDataSupport) value;
 
-        values = new HashMap<String, Object>();
-        for (String key : keys) {
-           if (! composite.containsKey(key)) 
-                _logger.warn("DataPoint '" + key + "' not found.");
-           else
-                values.put(key, composite.get(key));
-        }
+      values = extractData(composite, keys);
 
     }
-    /*
-     * get ready for tabular data support here
-     *
-    // TabularData
-    else if (multiValue instanceof TabularDataSupport) {
-        _logger.info("dealing with tabular data");
-        _logger.info("multivalue is: " +multiValue.toString());
+    else if (value instanceof TabularDataSupport) {
+      _logger.debug("dealing with tabular data");
+      _logger.debug("multivalue is: " + value.toString());
 
+      // cast the Object to a CompositeDataSupport so we can work with it
+      TabularDataSupport table = (TabularDataSupport) value;
+      values = extractData(table, keys);
 
-
-        // cast the Object to a CompositeDataSupport so we can work with it
-        TabularDataSupport composite = (TabularDataSupport) multiValue;
-
-        _logger.info("keys are: " +composite.keySet().toString());
-        _logger.info("entries are: " +composite.entrySet().toString());
-
-
-
-
-        values = new HashMap<String, Object>();
-        for (String key : keys) {
-           if (! composite.containsKey(key)) 
-                _logger.warn("key '" + key + "' not found.");
-           else
-                values.put(key, composite.get(key));
-        }
-    }*/
+    }
     // if the attribute wasn't multi-value just return the attribute
     else {
-        _logger.debug("dealing with other data");
-        values = new HashMap<String, Object>();
-        values.put(keys.iterator().next(), multiValue);
+      _logger.debug("dealing with other data");
+      values = new HashMap<String, Object>();
+      values.put(keys.iterator().next(), value);
     }
 
+    return values;
+  }
+
+  private Map<String, Object> extractData(TabularDataSupport table,
+      List<String> dataPointKeys) {
+    HashMap<String, Object> values = new HashMap<String, Object>();
+    _logger.debug("keys are: " + table.keySet().toString());
+    _logger.debug("entries are: " + table.entrySet().toString());
+
+    values = new HashMap<String, Object>();
+
+    // iterate through table entries and extract data from composite entries
+    for (String dataPoint : dataPointKeys) {
+
+      Object[] tableIndex = new Object[] { dataPoint };
+      CompositeData composite = table.get(tableIndex);
+      if (composite == null) {
+        _logger.warn("no table entry for index " + tableIndex);
+        continue;
+      }
+      values.putAll(extractTableData(composite, dataPoint));
+    }
+    return values;
+  }
+
+  private Map<String, Object> extractData(CompositeData composite,
+      List<String> keys) {
+    Map<String, Object> values = new HashMap<String, Object>();
+    for (String key : keys) {
+      if (!composite.containsKey(key))
+        _logger.warn("DataPoint '" + key + "' not found.");
+      else
+        values.put(key, composite.get(key));
+
+    }
+    return values;
+  }
+
+  private Map<String, Object> extractTableData(CompositeData composite,
+      String key) {
+    Map<String, Object> values = new HashMap<String, Object>();
+
+    // assumption is that composite is a name value pair and we want the
+    // value
+    if (composite.values().contains(key)) {
+      for (Object value : composite.values()) {
+        if (!key.equals(value)) {
+          values.put(key, value);
+        }
+      }
+    } else {
+      _logger.warn("DataPoint '" + key
+          + "' not found in composite data for tabular data");
+    }
     return values;
   }
 

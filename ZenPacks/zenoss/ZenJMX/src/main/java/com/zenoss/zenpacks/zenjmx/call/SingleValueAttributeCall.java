@@ -12,6 +12,7 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,14 @@ public class SingleValueAttributeCall
   private static final Log _logger = 
     LogFactory.getLog(SingleValueAttributeCall.class);
 
+  private String _dataPointName;
 
   /**
    * Creates a SingleAttributeCall
    */
   public SingleValueAttributeCall(String objectName,
                                   String attrName,
+                                  String dataPointName,
                                   String attrType) {
     super(objectName);
 
@@ -63,7 +66,7 @@ public class SingleValueAttributeCall
     Map<String, String> typeMap = new HashMap<String, String>();
     typeMap.put(attrName, attrType);
     setTypeMap(typeMap);
-
+    _dataPointName = dataPointName;
     _summary.setCallSummary("single-value attribute: " + attrName);
   }
 
@@ -79,26 +82,21 @@ public class SingleValueAttributeCall
  * @see Callable#call
    */
   public Summary call(JmxClient client) throws JmxException {
-      // record when we started
+  // record when we started
       _startTime = System.currentTimeMillis();
-    
       // issue the query
-        _logger.debug("in test code");
-      Object result = client.query(_objectName, _attrName);
-      
-    
-      // marshal the results
-      Map<String, Object> values = new HashMap<String, Object>();
-      values.put(_attrName, result);
+      Map<String, Object> values = client.query(_objectName, _attrName, 
+              Collections.singletonList(_dataPointName));
+  
       _summary.setResults(values);
-    
+  
       // record the runtime of the call
       _summary.setRuntime(System.currentTimeMillis() - _startTime);
-
+  
       // set our id so the processor can remove it from the reactor
       _summary.setCallId(hashCode());
 
-        // return result
+      // return result
       return _summary;
     
   }
@@ -116,10 +114,12 @@ public class SingleValueAttributeCall
     if (types.size() > 0) {
       type = types.iterator().next();
     }
+    String dpName = config.getDataPoints().iterator().next();
 
     SingleValueAttributeCall call = 
       new SingleValueAttributeCall(config.getOjectName(),
                                    config.getAttributeName(),
+                                   dpName,
                                    type);
     call.setDeviceId(config.getDevice());
     call.setDataSourceId(config.getDatasourceId());

@@ -147,6 +147,10 @@ public class ZenJmxService {
 
         private List<Map<String, String>> createResult(Summary summary) {
 
+            if(_logger.isDebugEnabled())
+                {
+                _logger.debug(summary.toString());
+                }
             List<Map<String, String>> results = new ArrayList<Map<String, String>>();
 
             Map<String, Object> values = summary.getResults();
