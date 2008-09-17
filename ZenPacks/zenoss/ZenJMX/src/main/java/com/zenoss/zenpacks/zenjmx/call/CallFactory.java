@@ -63,8 +63,9 @@ public class CallFactory {
       List<String>dataPoints = config.getDataPoints();
       if (dataPoints.isEmpty()) {
           _logger.warn("no data points defined");
-          throw new ConfigurationException("No datapoints defined; " +
-                          "will not run collections");
+          throw new ConfigurationException("Datasource " + 
+                          config.getDatasourceId() + "No datapoints defined;" +
+                          " will not run collections");
       }
 
       // the id of the device we will query

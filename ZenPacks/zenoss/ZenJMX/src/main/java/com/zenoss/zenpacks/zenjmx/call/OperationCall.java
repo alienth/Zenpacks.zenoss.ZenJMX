@@ -251,14 +251,10 @@ public class OperationCall
   public static OperationCall fromValue(ConfigAdapter config) 
     throws ConfigurationException {
 
-    String url = Utility.getUrl(config);
-    boolean auth = config.authenticate();
-    
     String[] paramTypes = config.getOperationParamTypes();
 
     Object[] paramValues = new Object[] {};
-    String[] params =  config.getOperationParamValues();
-    paramValues = createParamValues(params, paramTypes);
+    paramValues = createParamValues(config);
 
     List<String> keys = config.getDataPoints();
     _logger.debug("keys: " + keys);
@@ -281,11 +277,15 @@ public class OperationCall
   
   
 
-  private static Object[] createParamValues(String[] params,
-          String[] paramTypes) throws ConfigurationException {
+  private static Object[] createParamValues(ConfigAdapter config) 
+    throws ConfigurationException {
+      String[] params =  config.getOperationParamValues();
+      String[] paramTypes = config.getOperationParamTypes();
+
       if (params.length != paramTypes.length) {
-          throw new ConfigurationException("number of parameter types and "
-                  + "parameter values does not match");
+          throw new ConfigurationException("Datasource "+ 
+              config.getDatasourceId() + " number of parameter types and " +
+              "parameter values does not match");
       }
       Object[] values = new Object[params.length];
       for (int i = 0; i < params.length; i++) {
@@ -305,13 +305,14 @@ public class OperationCall
               } else if (STRING_TYPES.contains(type)) {
                   resultValue = valueStr;
               } else {
-                  throw new ConfigurationException("Type " + type
+                  throw new ConfigurationException("Datasource "+ 
+                      config.getDatasourceId() + " Type " + type
                           + " is not handled for operation calls");
               }
           } catch (NumberFormatException e) {
               throw new ConfigurationException(String.format(
-                      "value %1$s could not be converted to %2$s", valueStr,
-                      type));
+                      "Datasource %1$s; value %2$s could not be converted to %3$s", 
+                      config.getDatasourceId(), valueStr, type));
           }
           values[i] = resultValue;
       }

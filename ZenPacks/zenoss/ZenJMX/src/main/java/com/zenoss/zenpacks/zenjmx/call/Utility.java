@@ -84,15 +84,17 @@ public class Utility {
     
         String protocol = config.getJmxProtocol();
         if ("".equals(port)) {
-            String message = "jmxPort or zJmxManagementPort not specified";
-            throw new ConfigurationException(message);
+            String message = " jmxPort or zJmxManagementPort not specified";
+            throw new ConfigurationException("Datasource " + 
+                config.getDatasourceId() + message);
         }
 
         String hostAddr = config.getManageIp();
      
         if ((hostAddr == null) || ("".equals(hostAddr.trim()))) {
-            String message = "manageIp or device properties not specified";
-            throw new ConfigurationException(message);
+            String message = " manageIp or device properties not specified";
+            throw new ConfigurationException("Datasource " + 
+                config.getDatasourceId() + message);
         }
     
         url = "service:jmx:";

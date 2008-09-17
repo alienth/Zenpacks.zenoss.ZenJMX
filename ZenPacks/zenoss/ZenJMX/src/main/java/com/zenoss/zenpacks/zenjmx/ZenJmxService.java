@@ -121,7 +121,7 @@ public class ZenJmxService {
                     try {
                         call.call(client);
                         results.addAll(createResult(summary));
-                    } catch (JmxException e) {
+                    } catch (Exception e) {
                         results.add(createError(summary, config, e));
                     }
                 } catch (ConfigurationException e) {
@@ -209,6 +209,7 @@ public class ZenJmxService {
             error.put(ConfigAdapter.DATASOURCE_ID, config.getDatasourceId());
             error.put(ConfigAdapter.EVENT_CLASS, config.getEventClass());
             error.put(ConfigAdapter.EVENT_KEY, config.getEventKey());
+            error.put(ConfigAdapter.COMPONENT_KEY, config.getComponent());
             return error;
         }
     }

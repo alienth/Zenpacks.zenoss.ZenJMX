@@ -212,7 +212,6 @@ class ZenJMX(RRDDaemon):
                     if not self.jmxConnUp.get(mbeanServerKey, False):
                         self.sendEvent({},
                                        severity = Event.Clear,
-                                       component = connectionComponentKey,
                                        eventClass = "/Status/JMX/Connection",
                                        summary = "Connection is up",
                                        device = deviceId)
@@ -223,9 +222,10 @@ class ZenJMX(RRDDaemon):
                                    "jmx error, sending event for %s" 
                                    % result)
                     #default component to use
-                    evt = self.createEvent(result, connectionComponentKey)
+                    evt = self.createEvent(result)
                     self.sendEvent(evt, severity=Event.Warning)
-                    self.jmxConnUp[mbeanServerKey] = False
+                    if(evt.get("eventClass") == "/Status/JMX/Connection"):
+                       self.jmxConnUp[mbeanServerKey] = False
             
         mbeanServerKey = ""
         connectionComponentKey = ""

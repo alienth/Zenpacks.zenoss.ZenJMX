@@ -8,13 +8,13 @@
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -61,13 +61,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -114,13 +114,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -159,13 +159,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -482,13 +482,13 @@ AVERAGE
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -535,13 +535,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -588,13 +588,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -633,13 +633,13 @@ True
 JMX
 </property>
 <property type="boolean" id="enabled" mode="w" >
-[True, True]
+True
 </property>
 <property type="string" id="component" mode="w" >
 JMX
 </property>
 <property type="string" id="eventClass" mode="w" >
-/
+/Status/JMX
 </property>
 <property type="int" id="severity" mode="w" >
 3
@@ -949,7 +949,7 @@ AVERAGE
 </tomanycont>
 </object>
 <!-- ('', 'zport', 'dmd', 'Events', 'Status', 'Jmx') -->
-<object id='/zport/dmd/Events/Status/Jmx' module='Products.ZenEvents.EventClass' class='EventClass'>
+<object id='/zport/dmd/Events/Status/JMX' module='Products.ZenEvents.EventClass' class='EventClass'>
 <object id='Connection' module='Products.ZenEvents.EventClass' class='EventClass'>
 </object>
 </object>

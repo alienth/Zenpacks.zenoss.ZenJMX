@@ -28,6 +28,7 @@ public class ConfigAdapter {
     public static final String DATA_POINT_TYPES = "dptypes";
     public static final String EVENT_KEY = "eventKey";
     public static final String EVENT_CLASS = "eventClass";
+    public static final String COMPONENT_KEY = "component";
 
     
     public static final String DELIMITER = ",";
@@ -139,6 +140,9 @@ public class ConfigAdapter {
     public String getEventKey() {
         return (String) configMap.get(EVENT_KEY);
     }
+    public String getComponent() {
+      return (String) configMap.get(COMPONENT_KEY);
+  }
 
     
     public List<String> getDataPoints() {
