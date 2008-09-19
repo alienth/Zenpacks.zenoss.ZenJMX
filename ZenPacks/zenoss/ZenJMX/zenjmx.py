@@ -87,7 +87,7 @@ class ZenJMX(RRDDaemon):
             
         
         def startZenjmx(result):
-            self.log.debug("startZenjmx(): %s" % result)
+            self.log.info("startZenjmx(): %s" % result)
             drive(configTask).addCallbacks(self.runCollection, self.errorStop)
         
         self.log.debug("connected(): zenjmxjavaport is %s" % \
@@ -102,7 +102,7 @@ class ZenJMX(RRDDaemon):
         self.log.debug("connected(): cycletime is %s" % self.options.cycletime)
         self.cycleSeconds = self.options.cycletime
         self.heartbeatTimeout = self.cycleSeconds* 3
-        self.javaProcess = ZenJmxJavaClient(args, self.options.cycle)
+        self.javaProcess = ZenJmxJavaClient(args, self, self.options.cycle)
         running = self.javaProcess.run()
         self.log.debug("connected(): launched process, waiting on callback")
         running.addCallback(startZenjmx)
@@ -385,7 +385,7 @@ class ZenJmxJavaClient(ProcessProtocol):
     protocol to control the zenjmxjava process
     """
 
-    def __init__(self, args, cycle=True):
+    def __init__(self, args, zenjmx, cycle=True):
         self.deferred = Deferred()
         self.stopCalled = False
         self.process = None
@@ -394,11 +394,21 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.log = logging.getLogger("zen.ZenJmxJavaClient")
         self.args = args
         self.cycle = cycle
+        self.zenjmx = zenjmx
         
 
     def processEnded(self, reason):
         self.process = None
         if not self.stopCalled:
+            procEndEvent = {
+                            'eventClass': '/status/JMX', 
+                            'summary': 'zenjmxjava ended unexpectedly: %s' % \
+                            reason.getErrorMessage(),
+                            'severity': Event.Warning,
+                            'component':self.zenjmx.name, 
+                            'device':self.zenjmx.options.monitor
+                            }
+            self.zenjmx.sendEvent(procEndEvent)
             self.log.warn("processEnded():zenjmxjava process ended %s" \
                            % reason)
             if(self.deferred):
@@ -428,14 +438,24 @@ class ZenJmxJavaClient(ProcessProtocol):
         
 
     def connectionMade(self):
-        self.log.debug("connectionMade():")
+        self.log.debug("connectionMade():zenjmxjava started")
         def doCallback():
             msg = "doCallback(): callback on deferred zenjmxjava proc is up"
             self.log.debug(msg)
             if(self.deferred):
                 self.deferred.callback("zenjmx java started")
+            if self.process:
+                procStartEvent = {
+                                  'eventClass': '/status/JMX', 
+                                  'summary': 'zenjmxjava started',
+                                  'severity': Event.Clear,
+                                  'component':self.zenjmx.name, 
+                                  'device':self.zenjmx.options.monitor
+                                  }
+                self.zenjmx.sendEvent(procStartEvent)
             self.deferred = None
         if self.deferred:
+            self.log.debug("connectionMade():scheduling callback")
             #give the java service a chance to startup
             reactor.callLater(3, doCallback)
         self.log.debug("connectionMade(): done")
