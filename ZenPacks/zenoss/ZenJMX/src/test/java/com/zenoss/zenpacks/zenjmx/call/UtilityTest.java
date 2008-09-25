@@ -12,12 +12,12 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import junit.framework.*;
-import junit.textui.TestRunner;
-
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 
 /**
@@ -74,24 +74,6 @@ public class UtilityTest
    */
 
   /**
-   * Tests the get() method
-   */
-  public void testGet() {
-    Map<String, String> config = new HashMap<String, String>();
-    config.put("a", "b");
-
-    // make sure unknowns work
-    assertTrue("".equals(Utility.get(config, "z", "z")));
-
-    // make sure jproperties work
-    assertTrue("b".equals(Utility.get(config, "a", "z")));
-
-    // make sure zproperties work
-    assertTrue("b".equals(Utility.get(config, "z", "a")));
-  }
-
-
-  /**
    * Tests the getUrl() method
    */
   public void testGetUrl() {
@@ -126,43 +108,6 @@ public class UtilityTest
 //    }
   }
 
-
-  /**
-   * Tests the getUsername() method
-   */
-  public void testGetUsername() {
-    Map<String, String> config = new HashMap<String, String>();
-    assertTrue("blank not handled", "".equals(Utility.getUsername(config)));
-    
-    String val = "username1";
-    config.put("zJmxManagementUsername", val);
-    assertTrue("zproperty not handled", 
-               val.equals(Utility.getUsername(config)));
-
-    val = "username2";
-    config.put("username", val);
-    assertTrue("jmx property not handled", 
-               val.equals(Utility.getUsername(config)));
-  }
-
-
-  /**
-   * Tests the getPassword() method
-   */
-  public void testGetPassword() {
-    Map<String, String> config = new HashMap<String, String>();
-    assertTrue("blank not handled", "".equals(Utility.getPassword(config)));
-    
-    String val = "password1";
-    config.put("zJmxManagementPassword", val);
-    assertTrue("zproperty not handled", 
-               val.equals(Utility.getPassword(config)));
-
-    val = "password2";
-    config.put("password", val);
-    assertTrue("jmx property not handled", 
-               val.equals(Utility.getPassword(config)));
-  }
 
 
   /**

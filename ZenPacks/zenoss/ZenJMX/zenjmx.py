@@ -44,7 +44,8 @@ from Products.ZenUtils.Driver import drive, driveLater
 import ZenPacks.zenoss.ZenJMX
 
 
-from ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService import JMXDataSourceConfig
+from ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService \
+import JMXDataSourceConfig
 
 
 import time
@@ -83,7 +84,7 @@ class ZenJMX(RRDDaemon):
                             configTime)
             self.log.debug("configTask(): daemon stats config time is %s" 
                           % configTime)
-            driveLater(self.configCycleInterval, configTask)
+            driveLater(self.configCycleInterval * 60, configTask)
             
         
         def startZenjmx(result):
@@ -99,6 +100,8 @@ class ZenJMX(RRDDaemon):
             args = args + ("-zenjmxjavaport", str(self.options.zenjmxjavaport))
         if self.options.logseverity:
             args = args + ("-v", str(self.options.logseverity))
+        if self.options.concurrentJMXCalls:
+            args = args + ("-concurrentJMXCalls",)
         self.log.debug("connected(): cycletime is %s" % self.options.cycletime)
         self.cycleSeconds = self.options.cycletime
         self.heartbeatTimeout = self.cycleSeconds* 3
@@ -124,6 +127,11 @@ class ZenJMX(RRDDaemon):
         jmxDeviceConfig should be a JMXDeviceConfig
         """
         key = jmxDeviceConfig.deviceId
+        #if device option specified only deal with configs for that device
+        if self.options.device and self.options.device != key:
+            msg = "device option enabled for %s; rejecting config for %s"
+            self.log.info(msg % (self.options.device, key))
+            return
         self.log.debug("updateConfig(): updating config for device %s" % key)
         for dataSources in jmxDeviceConfig.jmxDataSourceConfigs.values():
             for dataSource in dataSources:
@@ -308,8 +316,7 @@ class ZenJMX(RRDDaemon):
                               % deviceId)
                 for dsConfigList in config.jmxDataSourceConfigs.values():
                     dataSourceConfigs.append(dsConfigList)
-                
-            jobs = NJobs(200,
+            jobs = NJobs(self.options.parallel,
                          self.collectJmx,
                          dataSourceConfigs)
             yield jobs.start()
@@ -352,7 +359,7 @@ class ZenJMX(RRDDaemon):
         def handleError(error):
             self.running = False
             self.log.error("handleError():Error running doCollection: %s"
-                           % error.printTraceback())
+                           % error)
             if not self.options.cycle:
                 self.stop()
         d = drive(doCollection)
@@ -373,6 +380,13 @@ class ZenJMX(RRDDaemon):
                                default=300,
                                type='int',
                                help="Cycle time, in seconds, to run collection")
+        self.parser.add_option('--concurrentJMXCalls',
+                               dest='concurrentJMXCalls', action="store_true",
+                               default=False,
+                               help="Enable concurrent calls to a JMX server")
+        self.parser.add_option('--parallel', dest='parallel', 
+                               default=200, type='int',
+                               help="number of devices to collect at one time")
         
     def stop(self):
         if self.javaProcess:
@@ -381,7 +395,7 @@ class ZenJMX(RRDDaemon):
         RRDDaemon.stop(self)
 
 class ZenJmxJavaClient(ProcessProtocol):
-    """"
+    """
     protocol to control the zenjmxjava process
     """
 
@@ -411,7 +425,7 @@ class ZenJmxJavaClient(ProcessProtocol):
             self.zenjmx.sendEvent(procEndEvent)
             self.log.warn("processEnded():zenjmxjava process ended %s" \
                            % reason)
-            if(self.deferred):
+            if self.deferred:
                 self.deferred.errback(reason)
             self.deferred = None
             self.log.info("processEnded():restarting zenjmxjava")

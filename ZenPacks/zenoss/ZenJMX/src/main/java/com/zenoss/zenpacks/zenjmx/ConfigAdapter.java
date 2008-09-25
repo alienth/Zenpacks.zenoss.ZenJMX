@@ -1,8 +1,17 @@
+///////////////////////////////////////////////////////////////////////////
+//
+// This program is part of Zenoss Core, an open source monitoring platform.
+// Copyright (C) 2008, Zenoss Inc.
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License version 2 as published by
+// the Free Software Foundation.
+//
+// For complete information please visit: http://www.zenoss.com/oss/
+//
+///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx;
 
-import static com.zenoss.zenpacks.zenjmx.call.CallFactory.DATA_POINT;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +45,6 @@ public class ConfigAdapter {
 
     public ConfigAdapter(Map config) {
         configMap = config;
-        System.out.println(configMap.toString());
     }
 
     //

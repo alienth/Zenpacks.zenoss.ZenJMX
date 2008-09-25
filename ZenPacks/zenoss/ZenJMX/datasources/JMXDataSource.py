@@ -56,7 +56,6 @@ class JMXDataSource(ZenPackPersistence, Base):
     operationParamValues = ''
     operationParamTypes = ''
 
-    eventClass = '/App/Java/JMX'
 
     _properties = Base._properties + (
         {'id':'jmxPort', 'type':'string', 'mode':'w'},

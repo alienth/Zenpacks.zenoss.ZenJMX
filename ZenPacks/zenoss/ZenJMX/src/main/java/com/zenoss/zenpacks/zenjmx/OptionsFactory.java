@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // This program is part of Zenoss Core, an open source monitoring platform.
-// Copyright (C) 2007, Zenoss Inc.
+// Copyright (C) 2008, Zenoss Inc.
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License version 2 as published by
@@ -31,6 +31,7 @@ public class OptionsFactory {
   public static final String LISTEN_PORT = "zenjmxjavaport";
   public static final String CONFIG_FILE = "configfile";
   public static final String LOG_SEVERITY = "v";
+  public static final String CONCURRENT_JMX_CALLS = "concurrentJMXCalls";
   
   // default values (also set in zenjmx.conf)
   public static final String DEFAULT_LISTENPORT = "9988";
@@ -69,6 +70,7 @@ public class OptionsFactory {
     o.addOption(createOption(CONFIG_FILE, true,  "configuration file"));
     o.addOption(createOption(LISTEN_PORT, true,  "Port to listen for requests"));
     o.addOption(createOption(LOG_SEVERITY, true,  "Severity for logging"));
+    o.addOption(createOption(CONCURRENT_JMX_CALLS, false,  "Enable concurrent calls to a JMX server"));
     return o;
   }
 

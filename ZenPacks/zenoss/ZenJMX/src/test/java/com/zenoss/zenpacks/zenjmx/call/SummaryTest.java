@@ -74,7 +74,6 @@ public class SummaryTest
     s.setCallSummary(CALL_SUMMARY);
     s.setDataSourceId(DATA_SOURCE_ID);
     s.setResults(RESULTS);
-    s.setTypeMap(TYPE_MAP);
     s.setRuntime(RUNTIME);
     s.setCancelled(CANCELLED);
     s.setCallId(CALL_ID);

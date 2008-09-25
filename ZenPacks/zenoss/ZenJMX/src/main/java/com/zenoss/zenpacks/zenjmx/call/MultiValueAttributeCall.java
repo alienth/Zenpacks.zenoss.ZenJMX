@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // This program is part of Zenoss Core, an open source monitoring platform.
-// Copyright (C) 2007, Zenoss Inc.
+// Copyright (C) 2008, Zenoss Inc.
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License version 2 as published by
@@ -12,15 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.zenoss.zenpacks.zenjmx.call.JmxCall.*;
-import static com.zenoss.zenpacks.zenjmx.call.SingleValueAttributeCall.*;
-import static com.zenoss.zenpacks.zenjmx.call.CallFactory.*;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,14 +57,11 @@ public class MultiValueAttributeCall
    */
   public MultiValueAttributeCall(String objectName,
                                  String attrName,
-                                 List<String> keys,
-                                 List<String> types) {
+                                 List<String> keys) {
     super(objectName);
 
     _attrName = attrName;
     _keys = keys;
-    
-    setTypeMap(buildTypeMap(keys, types));
 
     _summary.setCallSummary("multi-value attribute: " + attrName + 
                             " (" + keys + ")");
@@ -120,18 +111,13 @@ public class MultiValueAttributeCall
   public static MultiValueAttributeCall fromValue(ConfigAdapter  config) 
     throws ConfigurationException {
 
-    String url = Utility.getUrl(config);
-    boolean auth = config.authenticate();
-
     // ugly form of downcasting...  but XML-RPC doesn't give us a List<String>
     List<String> keys = config.getDataPoints();
-    List<String> types = config.getDataPointTypes();
 
     MultiValueAttributeCall call = 
       new MultiValueAttributeCall(config.getOjectName(),
                                   config.getAttributeName(),
-                                  keys,
-                                  types);
+                                  keys);
     
     call.setDeviceId(config.getDevice());
     call.setDataSourceId(config.getDatasourceId());

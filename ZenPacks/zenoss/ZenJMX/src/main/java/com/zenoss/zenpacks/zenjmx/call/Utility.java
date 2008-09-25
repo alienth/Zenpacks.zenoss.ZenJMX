@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // This program is part of Zenoss Core, an open source monitoring platform.
-// Copyright (C) 2007, Zenoss Inc.
+// Copyright (C) 2008, Zenoss Inc.
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License version 2 as published by
@@ -12,9 +12,8 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,25 +34,6 @@ public class Utility {
     
   private static final Log _logger = LogFactory.getLog(Utility.class);
 
-  /**
-   * Looks in the config Map provided and extracts the JMX property
-   * requested.  If it does not exist the method looks for the
-   * zProperty in the Map.  If it can't find that it returns ""
-   */
-  public static String get(Map config, String jProperty, String zProperty) {
-    String toReturn = "";
-    
-    if (config.containsKey(jProperty)) {
-      toReturn = (String) config.get(jProperty);
-    } 
-    //@TODO: zProperties are not added to config so this shouldn't find anything
-    if (zProperty != null && "".equals(toReturn.trim())
-                && config.containsKey(zProperty)) {
-            toReturn = config.get(zProperty).toString();
-        }
-
-    return toReturn;
-  }
 
 
   /**
@@ -106,22 +86,6 @@ public class Utility {
 
     _logger.debug("JMX URL is: "+url);
     return url;
-  }
-
-
-  /**
-   * Returns the JMX username from the configuration provided
-   */
-  public static String getUsername(Map config) {
-    return get(config, "username", "zJmxManagementUsername");
-  }
-
-
-  /**
-   * Returns the JMX password from the configuration provided
-   */
-  public static String getPassword(Map config) {
-    return get(config, "password", "zJmxManagementPassword");
   }
 
 
