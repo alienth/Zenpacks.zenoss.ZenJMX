@@ -415,7 +415,7 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.process = None
         if not self.stopCalled:
             procEndEvent = {
-                            'eventClass': '/status/JMX', 
+                            'eventClass': '/Status/JMX', 
                             'summary': 'zenjmxjava ended unexpectedly: %s' % \
                             reason.getErrorMessage(),
                             'severity': Event.Warning,
@@ -460,7 +460,7 @@ class ZenJmxJavaClient(ProcessProtocol):
                 self.deferred.callback("zenjmx java started")
             if self.process:
                 procStartEvent = {
-                                  'eventClass': '/status/JMX', 
+                                  'eventClass': '/Status/JMX', 
                                   'summary': 'zenjmxjava started',
                                   'severity': Event.Clear,
                                   'component':self.zenjmx.name, 
