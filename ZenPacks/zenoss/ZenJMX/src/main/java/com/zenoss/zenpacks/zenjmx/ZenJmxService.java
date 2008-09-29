@@ -100,7 +100,7 @@ public class ZenJmxService {
         client = createJmxClient();
         client.connect();
         result.addAll(doCollect(client));
-      } catch (Exception e) {
+      } catch (Throwable e) {
         Map<String, String> error = createConnectionError(_deviceId,
             "error connecting to server", e);
         result.add(error);
@@ -244,7 +244,7 @@ public class ZenJmxService {
     }
 
     private Map<String, String> createConnectionError(String deviceId,
-        String msg, Exception e) {
+        String msg, Throwable e) {
       HashMap<String, String> error = createError(deviceId, msg + ":"
           + e.getMessage());
       error.put(ConfigAdapter.EVENT_CLASS, "/Status/JMX/Connection");
