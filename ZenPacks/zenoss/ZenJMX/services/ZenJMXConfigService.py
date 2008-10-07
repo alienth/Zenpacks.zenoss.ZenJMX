@@ -131,7 +131,7 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
         components.append(self.jmxPort)
         if (self.authenticate):
             creds = self.username + self.password
-            components.append( md5.new(creds).hexDigest() );
+            components.append( md5.new(creds).hexdigest() );
         
             
         return ":".join(components)
