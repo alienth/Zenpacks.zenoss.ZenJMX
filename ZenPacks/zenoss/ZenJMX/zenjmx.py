@@ -226,12 +226,12 @@ class ZenJMX(RRDDaemon):
                     self.jmxConnUp[mbeanServerKey] = True
                 else:
                     #send event
-                    self.log.error("processResults(): "+\
+                    self.log.debug("processResults(): "+\
                                    "jmx error, sending event for %s" 
                                    % result)
                     #default component to use
                     evt = self.createEvent(result)
-                    self.sendEvent(evt, severity=Event.Warning)
+                    self.sendEvent(evt, severity=Event.Error)
                     if(evt.get("eventClass") == "/Status/JMX/Connection"):
                        self.jmxConnUp[mbeanServerKey] = False
             
