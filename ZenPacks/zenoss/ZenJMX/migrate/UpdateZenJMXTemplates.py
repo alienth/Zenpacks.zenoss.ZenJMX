@@ -28,7 +28,7 @@ class UpdateZenJMXTemplates(ZenPackMigration):
                 log.debug("found datasource")
             except AttributeError:
                 log.debug("error looking up datasource")
-                log.info("%s datasource does not exist", dsId)
+                log.debug("%s datasource does not exist", dsId)
                 return
             pack.manage_deletePackable([ds.getPrimaryUrlPath()])
             zenJMXTemplate.manage_deleteRRDDataSources([dsId])
@@ -46,14 +46,14 @@ class UpdateZenJMXTemplates(ZenPackMigration):
             try:
                 graph = zenJMXTemplate.graphDefs._getOb(graphId)
             except AttributeError:
-                log.info("%s graph def does not exist", graphId)
+                log.debug("%s graph def does not exist", graphId)
                 return
             
             gp = None
             try:
                 gp = graph.graphPoints._getOb(dpId)
             except AttributeError:
-                log.info("%s graph point does not exist on graph %s", 
+                log.debug("%s graph point does not exist on graph %s", 
                          dpId, graphId)
                 return
             pack.manage_deletePackable([gp.getPrimaryUrlPath()])
