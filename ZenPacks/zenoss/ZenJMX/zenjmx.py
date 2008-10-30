@@ -190,10 +190,13 @@ class ZenJMX(RRDDaemon):
             for key, val in config.__dict__.items():
                 if key != "rrdConfig" and type(val) in XmlRpcService.PRIMITIVES:
                     vals[key] = val
+            
+            rrdConfigs = config.rrdConfig.values()
+            rrdConfigs.sort(lambda x, y: cmp(x.dataPointId, y.dataPointId))
 
             vals['dps']=[]
             vals['dptypes']=[]
-            for rrdConfig in config.rrdConfig.values():
+            for rrdConfig in rrdConfigs:
                 vals['dps'].append(rrdConfig.dataPointId)
                 vals['dptypes'].append(rrdConfig.rrdType)
 
@@ -216,7 +219,10 @@ class ZenJMX(RRDDaemon):
                     dsId = result.get("datasourceId")
                     dpId = result.get("dpId")
                     value = result.get("value")
-                    self.storeRRD(deviceId, dsId, dpId, value)
+                    try:
+                        self.storeRRD(deviceId, dsId, dpId, value)
+                    except ValueError:
+                        pass
                     if not self.jmxConnUp.get(mbeanServerKey, False):
                         self.sendEvent({},
                                        severity = Event.Clear,
