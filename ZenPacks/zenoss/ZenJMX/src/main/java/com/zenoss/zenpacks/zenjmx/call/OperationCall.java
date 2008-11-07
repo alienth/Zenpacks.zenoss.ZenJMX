@@ -15,15 +15,14 @@
 
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Iterator;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import static com.zenoss.zenpacks.zenjmx.call.CallFactory.*;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,6 +62,8 @@ public class OperationCall
   private static final Set<String> DOUBLE_TYPES = new HashSet<String>();
   private static final Set<String> FLOAT_TYPES = new HashSet<String>();
   private static final Set<String> STRING_TYPES = new HashSet<String>();
+  private static final Set<String> BOOLEAN_TYPES = new HashSet<String>();
+
   static {
       INT_TYPES.add(Integer.class.getName());
       INT_TYPES.add("int");
@@ -77,6 +78,9 @@ public class OperationCall
       FLOAT_TYPES.add("float");
 
       STRING_TYPES.add(String.class.getName());
+      
+      BOOLEAN_TYPES.add(Boolean.class.getName());
+      BOOLEAN_TYPES.add("boolean");
       
   }
 
@@ -307,6 +311,8 @@ public class OperationCall
                   resultValue = Float.valueOf(valueStr);
               } else if (STRING_TYPES.contains(type)) {
                   resultValue = valueStr;
+              } else if (BOOLEAN_TYPES.contains(type)) {
+                  resultValue = new Boolean(valueStr);
               } else {
                   throw new ConfigurationException("Datasource "+ 
                       config.getDatasourceId() + " Type " + type
