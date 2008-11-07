@@ -190,6 +190,17 @@
         </tr>
 
         <tr>
+            <td class="tableheader">Attribute Path</td>
+            <td class="tablevalues" tal:condition="editable">
+            <input class="tablevalues" type="text" name="attributePath:string" size="50"
+                tal:attributes="value here/attributePath" />
+            </td>
+            <td class="tablevalues" tal:condition="not:editable" 
+                tal:content="here/attributePath"/>
+        </tr>
+
+
+        <tr>
             <td class="tableheader">Operation Name</td>
             <td class="tablevalues" tal:condition="editable">
             <input class="tablevalues" type="text" name="operationName:string" size="50"

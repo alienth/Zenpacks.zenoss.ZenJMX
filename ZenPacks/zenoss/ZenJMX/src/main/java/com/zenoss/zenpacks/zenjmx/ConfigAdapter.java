@@ -93,6 +93,11 @@ public class ConfigAdapter {
     public String getAttributeName() {
         return (String) configMap.get("attributeName");
     }
+    
+    public String getAttributePath() {
+        return (String) configMap.get("attributePath");
+    }
+
 
     /**
      * returns the parameter values for a jmx invoke operation

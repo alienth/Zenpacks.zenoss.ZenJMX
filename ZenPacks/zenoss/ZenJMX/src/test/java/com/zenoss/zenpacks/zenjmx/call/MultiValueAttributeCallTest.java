@@ -47,8 +47,8 @@ public class MultiValueAttributeCallTest
   private static List<String> KEYS;
   private static List<String> TYPES;
 
-  private MultiValueAttributeCall _call1;
-  private MultiValueAttributeCall _call2;
+  private AttributeCall _call1;
+  private AttributeCall _call2;
 
 
   static {

@@ -52,6 +52,7 @@ class JMXDataSource(ZenPackPersistence, Base):
     authenticate = False
 
     attributeName = ''
+    attributePath = ''
     operationName = ''
     operationParamValues = ''
     operationParamTypes = ''
@@ -69,6 +70,8 @@ class JMXDataSource(ZenPackPersistence, Base):
         {'id':'password', 'type':'string', 'mode':'w'},
 
         {'id':'attributeName', 'type':'string', 'mode':'w'},
+        {'id':'attributePath', 'type':'string', 'mode':'w'},
+
 
         {'id':'operationName', 'type':'string', 'mode':'w'},
         {'id':'operationParamValues', 'type':'string', 'mode':'w'},

@@ -14,11 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
-import java.util.Map;
 import java.util.List;
-import java.util.Arrays;
-
-import static com.zenoss.zenpacks.zenjmx.call.SingleValueAttributeCall.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,11 +66,6 @@ public class CallFactory {
                           " will not run collections");
       }
 
-      // the id of the device we will query
-      String deviceId = config.getDevice();
-
-      // the id of the data source
-      String dataSourceId = config.getDatasourceId();
 
       // if the attributeName is blank the configuration represents an operation
       String attributeName =  config.getAttributeName();
@@ -82,13 +73,10 @@ public class CallFactory {
       if (attributeName.trim().length() == 0) {
           _logger.debug("creating an operation call");
           call = OperationCall.fromValue(config);
-      }else if (dataPoints.size() > 1) {
-          _logger.debug("creating a multi-value attribute call");
-          call = MultiValueAttributeCall.fromValue(config);
-      } else {
-          _logger.debug("creating a single value attribute call");
-          call = SingleValueAttributeCall.fromValue(config);
-          }
+       }else{
+          _logger.debug("creating an attribute call");
+          call = AttributeCall.fromValue(config);
+       }
       return call;
   }
 }

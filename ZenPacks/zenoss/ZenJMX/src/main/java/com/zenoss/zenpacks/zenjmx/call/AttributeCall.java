@@ -36,7 +36,7 @@ import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
  * @author Christopher Blunck
  * @version $Revision: 1.6 $
  */
-public class MultiValueAttributeCall
+public class AttributeCall
   extends JmxCall {
 
   // configuration parameters
@@ -49,25 +49,27 @@ public class MultiValueAttributeCall
   // the keys of the attributes we should query
   private List<String> _keys;
 
+  //the path to the data
+  private String _attributePath;
   // logger
   private static final Log _logger = 
-    LogFactory.getLog(MultiValueAttributeCall.class);
+    LogFactory.getLog(AttributeCall.class);
 
 
   /**
    * Creates a MultiValueAttributeCall
    */
-  public MultiValueAttributeCall(String objectName,
-                                 String attrName,
-                                 List<String> keys) {
-    super(objectName);
+  public AttributeCall(String objectName, String attrName, List<String> keys,
+            String attributePath)
+        {
+        super(objectName);
 
-    _attrName = attrName;
-    _keys = keys;
-
-    _summary.setCallSummary("multi-value attribute: " + attrName + 
-                            " (" + keys + ")");
-  }
+        _attrName = attrName;
+        _keys = keys;
+        _attributePath = attributePath;
+        _summary.setCallSummary("attribute: " + attrName + "; attribute path "
+                + _attributePath + "; (" + keys + ")");
+        }
 
 
   /**
@@ -91,7 +93,7 @@ public class MultiValueAttributeCall
       // record when we started
       _startTime = System.currentTimeMillis();
       // issue the query
-      Map<String, Object> values = client.query(_objectName, _attrName, _keys);
+      Map<String, Object> values = client.query(_objectName, _attrName, _keys, _attributePath);
       
       _summary.setResults(values);
       
@@ -110,16 +112,17 @@ public class MultiValueAttributeCall
   /**
    * Creates a MultiValueAttributeCall from the configuration provided
    */
-  public static MultiValueAttributeCall fromValue(ConfigAdapter  config) 
+  public static AttributeCall fromValue(ConfigAdapter  config) 
     throws ConfigurationException {
 
     // ugly form of downcasting...  but XML-RPC doesn't give us a List<String>
     List<String> keys = config.getDataPoints();
 
-    MultiValueAttributeCall call = 
-      new MultiValueAttributeCall(config.getOjectName(),
+    
+    AttributeCall call = 
+      new AttributeCall(config.getOjectName(),
                                   config.getAttributeName(),
-                                  keys);
+                                  keys, config.getAttributePath());
     
     call.setDeviceId(config.getDevice());
     call.setDataSourceId(config.getDatasourceId());
@@ -132,13 +135,13 @@ public class MultiValueAttributeCall
    * @see Object#equals
    */
   public boolean equals(Object other) {
-    if (! (other instanceof MultiValueAttributeCall)) {
+    if (! (other instanceof AttributeCall)) {
       return false;
     }
 
     boolean toReturn = super.equals(other);
 
-    MultiValueAttributeCall call = (MultiValueAttributeCall) other;
+    AttributeCall call = (AttributeCall) other;
 
     toReturn &= Utility.equals(call.getAttributeName(), getAttributeName());
     toReturn &= Utility.equals(call.getKeys(), getKeys());
