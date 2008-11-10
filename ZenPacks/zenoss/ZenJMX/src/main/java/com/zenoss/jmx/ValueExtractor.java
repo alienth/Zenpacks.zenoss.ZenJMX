@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.InvalidKeyException;
 import javax.management.openmbean.TabularData;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +48,14 @@ public class ValueExtractor {
      * e.g. [key1,key2]
      * 
      * The brackets aren't mandatory for indexes but are included for clarity.
+     * 
+     * Curly brackets can be used after a table index to specify a column name.
+     * 
+     * e.g memoryUsageBeforeGc.[Perm Gen].{value}.used
+     * 
+     * The column name is only necessary when the table has more than two
+     * columns. If the table has two columns then the value is read from the
+     * column not used for the index.
      * 
      * @param obj
      *            TabularData or CompositeData
@@ -91,36 +98,48 @@ public class ValueExtractor {
                     {
                     _logger.debug("getDataValue: dealing with tabularData");
                     TabularData tData = (TabularData) currentObj;
-                    String tableIndex = null;
-                    // String rowValueName = null;
-                    // check for explicit table index
-                    if ( currentKey.startsWith("[") && currentKey.endsWith("]") )
-                        {
-                        _logger
-                                .debug("getDataValue: looks like an explicit index: "
-                                        + currentKey);
-                        tableIndex = currentKey;
-                        }
-                    else
-                        {
-                        _logger.debug("getDataValue: no explicit index: "
-                                + currentKey);
-                        // no explicit table index,
-                        // assume index is the same as the name of the value
-                        tableIndex = "[" + currentKey + "]";
-                        _logger.debug("getDataValue: create implied index "
-                                + tableIndex);
-                        // rowValueName = currentKey;
-                        // _logger.debug("getDataValue: row name is "
-                        // + rowValueName);
-                        }
-                    String[] index = createTableIndex(tableIndex);
+
+                    String[] index = createTableIndex(currentKey);
                     currentObj = getDataByTableIndex(tData, index);
-                    // if ( rowValueName != null )
-                    // {
                     CompositeData cData = (CompositeData) currentObj;
-                    currentObj = getTableRowData(cData, index);
-                    // }
+
+                    int columnCount = cData.values().size();
+                    String nextKey = null;
+
+                    // look ahead and look for explicit column
+                    if ( !pathList.isEmpty() )
+                        {
+                        nextKey = pathList.get(0);
+                        }
+
+                    if ( nextKey != null
+                            && (isColumn(nextKey) || columnCount > 2) )
+                        {
+
+                        String columnKey = pathElements.next();
+                        pathElements.remove();
+                        if ( isColumn(columnKey) )
+                            {
+                            _logger.debug("using explicit column key "
+                                    + columnKey + " for tabular data");
+                            // remove first and last char - should be curly
+                            // brackets
+                            columnKey = columnKey.substring(1, columnKey
+                                    .length() - 1);
+                            }
+                        else
+                            {
+                            _logger
+                                    .debug("using column key "
+                                            + columnKey
+                                            + " for tabular data. No curly brackets found");
+                            }
+                        currentObj = getData(cData, columnKey);
+                        }
+                    else if ( cData.values().size() == 2 )
+                        {
+                        currentObj = getTableRowData(cData, index);
+                        }
                     }
                 else if ( currentObj instanceof CompositeData )
                     {
@@ -160,6 +179,11 @@ public class ValueExtractor {
         return currentObj;
         }
 
+    private static boolean isColumn(String key)
+        {
+        return key.startsWith("{") && key.endsWith("}");
+        }
+
     private static Object getData(CompositeData cData, String key)
         {
         _logger.debug("composite data is: " + cData);
@@ -169,11 +193,24 @@ public class ValueExtractor {
         return result;
         }
 
-    private static String[] createTableIndex(String index)
+    private static String[] createTableIndex(String currentKey)
         {
-        _logger.debug("creating index for " + index);
-        // remove first and last char - should be brackets
-        index = index.substring(1, index.length() - 1);
+        String index = null;
+        if ( currentKey.startsWith("[") && currentKey.endsWith("]") )
+            {
+            _logger.debug("getDataValue: looks like an explicit index: "
+                    + currentKey);
+            // remove first and last char - should be brackets
+            index = currentKey.substring(1, currentKey.length() - 1);
+            }
+        else
+            {
+            _logger.debug("getDataValue: no explicit index: " + currentKey);
+            // no explicit table index,
+            // assume index is the same as the name of the value
+            index = currentKey;
+            }
+
         _logger.debug("spliting " + index + " for index ");
         String[] indexValues = index.split(",");
 

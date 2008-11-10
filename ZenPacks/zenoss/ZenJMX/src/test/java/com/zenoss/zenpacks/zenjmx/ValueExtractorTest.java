@@ -9,13 +9,11 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 
-import sun.java2d.pipe.SpanShapeRenderer.Simple;
+import junit.framework.TestCase;
 
 import com.zenoss.jmx.JmxException;
 import com.zenoss.jmx.ValueExtractor;
 import com.zenoss.zenpacks.zenjmx.call.ZenJMXTest;
-
-import junit.framework.TestCase;
 
 public class ValueExtractorTest extends TestCase {
 
@@ -66,6 +64,7 @@ public class ValueExtractorTest extends TestCase {
 
         gcObject = mbs.getAttribute(gcObjectName, "LastGcInfo");
         }
+
 
     public void testSimpleTabularPath() throws Exception
         {
@@ -240,6 +239,18 @@ public class ValueExtractorTest extends TestCase {
         assertEquals(Long.class, result.getClass());
 
         }
+
+    public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithIndexAndColumn()
+            throws Exception
+        {
+
+        Object result = ValueExtractor.getDataValue(gcObject,
+                "memoryUsageAfterGc.[Eden Space].{value}.committed");
+        assertEquals(Long.class, result.getClass());
+
+        }
+    
+    
 
     public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithExtraPath()
             throws Exception

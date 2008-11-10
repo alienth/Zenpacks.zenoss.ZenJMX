@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -78,7 +77,7 @@ public class JmxClient {
      * Creates a JmxClient for interacting with the local Platform MBeanServer
      * 
      */
-    public JmxClient(MBeanServer mbs)
+    public JmxClient()
         {
         _server = ManagementFactory.getPlatformMBeanServer(); 
         _connected = true;
