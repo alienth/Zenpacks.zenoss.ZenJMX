@@ -1,6 +1,8 @@
 package com.zenoss.zenpacks.zenjmx;
 
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryManagerMXBean;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -37,8 +39,7 @@ public class ValueExtractorTest extends TestCase {
 
         mbs = ManagementFactory.getPlatformMBeanServer();
         // objectName = new
-        gcObjectName = new ObjectName(
-                "java.lang:type=GarbageCollector,name=Copy");
+
         testObjectName = new ObjectName(ZenJMXTest.mbeanObjectNameStr);
         if ( isOneSix )
             {
@@ -62,9 +63,21 @@ public class ValueExtractorTest extends TestCase {
             testSimpleTabular = (TabularData) o;
             }
 
-        gcObject = mbs.getAttribute(gcObjectName, "LastGcInfo");
-        }
+        // lets find a registered gc mbean
+        for (MemoryManagerMXBean gc : ManagementFactory
+                .getMemoryManagerMXBeans())
+            {
+            String name = gc.getName();
+            gcObjectName = new ObjectName(
+                    "java.lang:type=GarbageCollector,name=" + name);
+            if ( mbs.isRegistered(gcObjectName) )
+                {
+                gcObject = mbs.getAttribute(gcObjectName, "LastGcInfo");
+                break;
+                }
+            }
 
+        }
 
     public void testSimpleTabularPath() throws Exception
         {
@@ -190,7 +203,7 @@ public class ValueExtractorTest extends TestCase {
         {
 
         Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.Eden Space");
+                "memoryUsageAfterGc.Code Cache");
         assertEquals(CompositeDataSupport.class, result.getClass());
 
         }
@@ -199,7 +212,7 @@ public class ValueExtractorTest extends TestCase {
         {
 
         Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Eden Space]");
+                "memoryUsageAfterGc.[Code Cache]");
         assertEquals(CompositeDataSupport.class, result.getClass());
 
         }
@@ -211,7 +224,7 @@ public class ValueExtractorTest extends TestCase {
             {
 
             ValueExtractor.getDataValue(gcObject,
-                    "memoryUsageAfterGc.[Eden Space, Committed]");
+                    "memoryUsageAfterGc.[Code Cache, Committed]");
             }
         catch (JmxException e)
             {
@@ -225,7 +238,7 @@ public class ValueExtractorTest extends TestCase {
         {
 
         Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.Eden Space.committed");
+                "memoryUsageAfterGc.Code Cache.committed");
         assertEquals(Long.class, result.getClass());
 
         }
@@ -235,7 +248,7 @@ public class ValueExtractorTest extends TestCase {
         {
 
         Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Eden Space].committed");
+                "memoryUsageAfterGc.[Code Cache].committed");
         assertEquals(Long.class, result.getClass());
 
         }
@@ -245,12 +258,10 @@ public class ValueExtractorTest extends TestCase {
         {
 
         Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Eden Space].{value}.committed");
+                "memoryUsageAfterGc.[Code Cache].{value}.committed");
         assertEquals(Long.class, result.getClass());
 
         }
-    
-    
 
     public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithExtraPath()
             throws Exception
@@ -258,7 +269,7 @@ public class ValueExtractorTest extends TestCase {
         try
             {
             ValueExtractor.getDataValue(gcObject,
-                    "endTime.[Eden Space].committed.pop");
+                    "endTime.[Code Cache].committed.pop");
             }
         catch (JmxException e)
             {
