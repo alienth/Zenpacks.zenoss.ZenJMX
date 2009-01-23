@@ -22,12 +22,16 @@ ZENJMX_HOME=${PRGHOME}
 LIB_DIR=${ZENJMX_HOME}/lib
 
 CFGFILE=${ZENHOME}/etc/zenjmx.conf
-PIDFILE=${ZENHOME}/var/zenjmxjava-`grep confName ${CFGFILE} | awk '{print $2}'`.pid
-
 if [ ! -f ${CFGFILE} ]; then
     cp ${LIB_DIR}/zenjmx.conf ${CFGFILE}
 fi
 
+MONITOR=`awk '/^monitor/ { print $2; }' ${CFGFILE}`
+if [ -z "${MONITOR}" ]; then
+    MONITOR="localhost"
+fi
+
+PIDFILE=${ZENHOME}/var/zenjmxjava-${MONITOR}.pid
 
 CMD=$1
 shift
@@ -49,7 +53,10 @@ done
 MAIN_CLASS="com.zenoss.zenpacks.zenjmx.ZenJmxMain"
 START_ARGS="--configfile ${CFGFILE} $@"
 RUN_ARGS="--configfile ${CFGFILE} $@"
-JMX_LISTEN_PORT="11111"
 
+JMX_LISTEN_PORT=`awk '/^jmxremoteport/ { print $2; }' ${CFGFILE}`
+if [ -z "${JMX_LISTEN_PORT}" ]; then
+    JMX_LISTEN_PORT="11111"
+fi
 
 generic $@
