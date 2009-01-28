@@ -55,8 +55,5 @@ START_ARGS="--configfile ${CFGFILE} $@"
 RUN_ARGS="--configfile ${CFGFILE} $@"
 
 JMX_LISTEN_PORT=`awk '/^jmxremoteport/ { print $2; }' ${CFGFILE}`
-if [ -z "${JMX_LISTEN_PORT}" ]; then
-    JMX_LISTEN_PORT="11111"
-fi
 
 generic $@
