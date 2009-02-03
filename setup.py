@@ -2,7 +2,7 @@
 # These variables are overwritten by Zenoss when the ZenPack is exported
 # or saved.  Do not modify them directly here.
 NAME = "ZenPacks.zenoss.ZenJMX"
-VERSION = "3.1.1"
+VERSION = "3.1.2"
 AUTHOR = "Zenoss"
 LICENSE = ""
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']

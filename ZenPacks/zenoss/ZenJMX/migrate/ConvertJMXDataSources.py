@@ -17,7 +17,7 @@ from Products.ZenModel.ZenPack import ZenPack, ZenPackDataSourceMigrateBase
 from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import JMXDataSource
 
 class ConvertJMXDataSources(ZenPackDataSourceMigrateBase):
-    version = Version(2, 1, 1)
+    version = Version(3, 1, 2)
     
     # These provide for conversion of datasource instances to the new class
     dsClass = JMXDataSource
@@ -26,4 +26,4 @@ class ConvertJMXDataSources(ZenPackDataSourceMigrateBase):
     
     # Reindex all applicable datasource instances
     reIndex = True
-            
+

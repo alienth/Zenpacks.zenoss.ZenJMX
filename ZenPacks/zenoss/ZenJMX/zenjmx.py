@@ -298,6 +298,7 @@ class ZenJMX(RRDDaemon):
             for result in jmxResults:
                 evtSummary = result.get('summary')
                 deviceId = result.get('device')
+                evt = self.createEvent(result)
                 if not evtSummary:
                     dsId = result.get('datasourceId')
                     dpId = result.get('dpId')
@@ -312,6 +313,7 @@ class ZenJMX(RRDDaemon):
                                 summary='Connection is up',
                                 device=deviceId)
                     self.jmxConnUp[mbeanServerKey] = True
+                    self.sendEvent(evt, severity=Event.Clear)
 
                 else:
                     # send event
@@ -319,8 +321,6 @@ class ZenJMX(RRDDaemon):
                                     + 'jmx error, sending event for %s'
                                     % result)
 
-                    # default component to use
-                    evt = self.createEvent(result)
                     self.sendEvent(evt, severity=Event.Error)
                     if evt.get('eventClass')\
                          == '/Status/JMX/Connection':
@@ -352,9 +352,8 @@ class ZenJMX(RRDDaemon):
         event = errorMap.copy()
         if component:
             event['component'] = component
-        # Erm.... doesn't this force the dictionary back to the
-        # same value if 'component' exists in the dictionary?
-        event.update(errorMap)
+        if event.get('datasourceId') and not event.get('eventKey'):
+            event['eventKey'] = event.get('datasourceId')
         return event
 
 

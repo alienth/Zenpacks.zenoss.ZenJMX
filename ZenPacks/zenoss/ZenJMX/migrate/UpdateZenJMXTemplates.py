@@ -19,7 +19,7 @@ import logging
 log = logging.getLogger("zen")
 
 class UpdateZenJMXTemplates(ZenPackMigration):
-    version = Version(3, 0, 0)
+    version = Version(3, 1, 2)
     
     def migrate(self, pack):        
         log.debug("UpdateZenJMXTemplates migrate")
@@ -78,6 +78,4 @@ class UpdateZenJMXTemplates(ZenPackMigration):
                          'Open File Descriptors_OpenFileDescriptorCount')
         
         deleteGraphPoint('ZenJMX Thread Count','Thread Count_ThreadCount')
-        
 
-        
