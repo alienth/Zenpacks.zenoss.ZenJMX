@@ -194,7 +194,7 @@ ThreadCount
 <tomanycont id='datapoints'>
 <object id='ThreadCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-COUNTER
+GAUGE
 </property>
 <property type="boolean" id="isrow" mode="w" >
 True
@@ -671,7 +671,7 @@ ThreadCount
 <tomanycont id='datapoints'>
 <object id='ThreadCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
-COUNTER
+GAUGE
 </property>
 <property type="boolean" id="isrow" mode="w" >
 True
