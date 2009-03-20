@@ -56,6 +56,7 @@ public class JMXTestData implements Serializable {
         
         result.put("rowOne", new NestedDataRow(654,384,938));
         result.put("rowTwo", new NestedDataRow(1,2,3));
+        result.put("row.Three", new NestedDataRow(3,2,1));
 
         return result;
             
@@ -76,9 +77,9 @@ public class JMXTestData implements Serializable {
             this.rowValue = rowValue;
             }
 
-        public int rowValue = 654;
-        public int anotherRowValue = 938;
-        public int differntRowValue = 384;
+        private int rowValue = 654;
+        private int anotherRowValue = 938;
+        private int differntRowValue = 384;
 
         public int getRowValue()
             {

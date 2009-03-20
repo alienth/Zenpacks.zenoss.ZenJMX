@@ -77,6 +77,7 @@ public class ZenJMXTest implements ZenJMXTestMXBean {
 
         result.put("rowOne", new NestedDataRow(654, 384, 938));
         result.put("rowTwo", new NestedDataRow(1, 2, 3));
+        result.put("row.Three", new NestedDataRow(3, 2, 1));
 
         return result;
         }
@@ -88,6 +89,7 @@ public class ZenJMXTest implements ZenJMXTestMXBean {
 
         result.put("rowOne", 5);
         result.put("rowTwo", 833);
+        result.put("row.Three", 100);
 
         return result;
         }

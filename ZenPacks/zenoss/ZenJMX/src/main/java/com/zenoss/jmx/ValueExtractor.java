@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
@@ -78,9 +79,7 @@ public class ValueExtractor {
 
         _logger.debug("getDataValue: path is " + path);
 
-        String[] pathArray = path.split("\\.");
-        List<String> pathList = Arrays.asList(pathArray);
-        pathList = new LinkedList<String>(pathList);
+        List<String> pathList = split(path);
         _logger.debug("getDataValue: pathList " + pathList);
 
         Object currentObj = obj;
@@ -92,6 +91,7 @@ public class ValueExtractor {
                 _logger.debug("getDataValue: current object is " + obj);
                 String currentKey = pathElements.next();
                 pathElements.remove();
+
                 _logger.debug("getDataValue: currentKey: " + currentKey);
 
                 if ( currentObj instanceof TabularData )
@@ -265,5 +265,39 @@ public class ValueExtractor {
             }
         return result;
         }
+
+    /**
+     * split a string on dots but leave values within brackets ([,}) that have dots intact
+     * for example the string "test.{bracket.stuff}" should be split to an array 
+     * [test, {bracket.stuff}]
+     * 
+     * @param path
+     * @return
+     */
+    public static LinkedList<String> split(String path)
+        {
+
+        String[] splitPath = dotPattern.split(path);
+        Iterator<String> pathElements = Arrays.asList(splitPath).iterator();
+        LinkedList<String> resultPath = new LinkedList<String>();
+        while (pathElements.hasNext())
+            {
+            String pathElement = pathElements.next();
+
+            while (bracketStart.matcher(pathElement).matches()
+                    && notBracketEnd.matcher(pathElement).matches()
+                    && pathElements.hasNext())
+                {
+                pathElement = pathElement + "." + pathElements.next();
+
+                }
+            resultPath.add(pathElement);
+            }
+        return resultPath;
+        }
+
+    private static Pattern dotPattern = Pattern.compile("\\.");
+    private static Pattern bracketStart = Pattern.compile("^[\\{\\[].*");
+    private static Pattern notBracketEnd = Pattern.compile(".*[^\\}\\]]$");
 
 }

@@ -17,7 +17,7 @@ import logging
 log = logging.getLogger("zen")
 
 class MigrateThreadCountDataPoints(ZenPackMigration):
-    version = Version(3, 1, 4)
+    version = Version(3, 1, 5)
     
     def migrate(self, pack):
         log.info("MigrateThreadCountDataPoints migrate")
