@@ -63,7 +63,7 @@ class ZenJMX(RRDDaemon):
          + ['ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService']
 
     def __init__(self, noopts=False):
-        RRDDaemon.__init__(self, 'zenjmx', noopts)
+        RRDDaemon.__init__(self, 'zenjmx')
 
         # map of deviceId -> JMXDeviceConfig
         self.deviceConfigs = {}
@@ -74,6 +74,10 @@ class ZenJMX(RRDDaemon):
         # if no entry then previous state is unknown (usually at startup)
         self.jmxConnUp = {}
         self.cycleSeconds = 300
+        self.rpcPort = self.options.zenjmxjavaport
+        self.javaProcess = None
+
+
 
 
     def connected(self):
@@ -108,18 +112,15 @@ class ZenJMX(RRDDaemon):
             @param result: result
             @type result: string
             """
-            self.log.info('startZenjmx(): %s' % result)
+            self.log.debug('startZenjmx(): %s' % str(result))
             drive(configTask).addCallbacks(self.runCollection,
                     self.errorStop)
-
+                
         self.log.debug('connected(): zenjmxjavaport is %s'
                         % self.options.zenjmxjavaport)
         args = None
         if self.options.configfile:
             args = ('--configfile', self.options.configfile)
-        if self.options.zenjmxjavaport:
-            args = args + ('-zenjmxjavaport',
-                           str(self.options.zenjmxjavaport))
         if self.options.logseverity:
             args = args + ('-v', str(self.options.logseverity))
         if self.options.concurrentJMXCalls:
@@ -128,14 +129,37 @@ class ZenJMX(RRDDaemon):
                         % self.options.cycletime)
         self.cycleSeconds = self.options.cycletime
         self.heartbeatTimeout = self.cycleSeconds * 3
-        self.javaProcess = ZenJmxJavaClient(args, self,
-                self.options.cycle)
-        running = self.javaProcess.run()
-        self.log.debug('connected(): launched process, waiting on callback'
-                       )
-        running.addCallback(startZenjmx)
-        running.addErrback(self.errorStop)
+        
+        def startJavaProc( driver ):
+            started = False
+            jmxClient = None
+            while ((self.rpcPort <= self.options.zenjmxjavaport + 5) and 
+                    not started):
+                jmxClient = ZenJmxJavaClient(args, self,
+                    self.options.cycle, self.rpcPort)
+                yield jmxClient.run()
 
+                result = driver.next()
+                #check result. If first value is True process started, 
+                #otherwise it will be the exitcode
+                if result[0] is True:
+                    self.javaProcess = jmxClient
+                    started = True
+                    self.javaProcess.restartEnabled = True
+                elif result[0] == 10:
+                    #code 10 is problem starting webserver; try next port
+                    self.rpcPort += 1
+                else:
+                    #unknown error
+                    raise RuntimeError('ZenJmxJavaClient could not be started, '+\
+                                       'check JVM type and version: %s' % result[1])
+
+            if not self.javaProcess:
+                raise RuntimeError("ZenJmxJavaClient could not be started, check ports")
+                
+        deferred = drive(startJavaProc)
+        deferred.addCallback(startZenjmx) 
+        deferred.addErrback(self.errorStop) 
 
     def remote_deleteDevice(self, deviceId):
         """
@@ -280,7 +304,7 @@ class ZenJMX(RRDDaemon):
             @type driver: string
             """
 
-            port = self.options.zenjmxjavaport
+            port = self.rpcPort
             xmlRpcProxy = xmlrpc.Proxy('http://localhost:%s/' % port)
             yield xmlRpcProxy.callRemote('zenjmx.collect', configMaps)
             results = driver.next()
@@ -528,7 +552,8 @@ class ZenJMX(RRDDaemon):
             dest='zenjmxjavaport',
             default=9988,
             type='int',
-            help='Port for zenjmxjava process',
+            help='Port for zenjmxjava process; default 9988. '+\
+                'Tries 5 consecutive ports if there is a conflict',
             )
         self.parser.add_option('--cycletime', dest='cycletime',
                                default=300, type='int',
@@ -564,6 +589,7 @@ class ZenJmxJavaClient(ProcessProtocol):
         args,
         zenjmx,
         cycle=True,
+        zenjmxjavaport=9988
         ):
         """
         Initializer
@@ -584,6 +610,9 @@ class ZenJmxJavaClient(ProcessProtocol):
         self.args = args
         self.cycle = cycle
         self.zenjmx = zenjmx
+        self.listenPort = zenjmxjavaport
+        self.restartEnabled = False
+
 
 
     def processEnded(self, reason):
@@ -607,10 +636,16 @@ class ZenJmxJavaClient(ProcessProtocol):
             self.log.warn('processEnded():zenjmxjava process ended %s'
                            % reason)
             if self.deferred:
-                self.deferred.errback(reason)
-            self.deferred = None
-            self.log.info('processEnded():restarting zenjmxjava')
-            reactor.callLater(1, self.run)
+                msg = reason.getErrorMessage()
+                exitCode = reason.value.exitCode
+                if exitCode == 10:
+                    msg = 'Could not start up Java web server, '+\
+                        'possible port conflict'
+                self.deferred.callback((exitCode,msg))
+                self.deferred = None
+            elif self.restartEnabled:
+                self.log.info('processEnded():restarting zenjmxjava')
+                reactor.callLater(1, self.run)
 
 
     def stop(self):
@@ -649,7 +684,7 @@ class ZenJmxJavaClient(ProcessProtocol):
                 'doCallback(): callback on deferred zenjmxjava proc is up'
             self.log.debug(msg)
             if self.deferred:
-                self.deferred.callback('zenjmx java started')
+                self.deferred.callback((True,'zenjmx java started'))
             if self.process:
                 procStartEvent = {
                     'eventClass': '/Status/JMX',
@@ -683,6 +718,9 @@ class ZenJmxJavaClient(ProcessProtocol):
         else:
             # don't want to start up with jmx server to avoid port conflicts
             args = ('run', )
+            
+        args = args + ('-zenjmxjavaport',
+                       str(self.listenPort))
         if self.args:
             args = args + self.args
         cmd = (zenjmxjavacmd, ) + args

@@ -90,7 +90,14 @@ public class ZenJmxMain {
         handler.initialize();
 
         server.setHandler(handler);
-        server.start();
+        try
+            {
+            server.start();
+            }
+        catch (Exception e)
+            {
+            System.exit(10);
+            }
         server.join();
         }
 
@@ -150,22 +157,27 @@ public class ZenJmxMain {
      * present it sets the name and value pair in the _config field.
      */
     private static void overrideProperty(Configuration config, CommandLine cmd,
-            String name) {
-        if (cmd.hasOption(name)) {
+            String name)
+        {
+        if ( cmd.hasOption(name) )
+            {
             String value = cmd.getOptionValue(name);
             config.setProperty(name, value);
             }
         }
-    
+
     /**
-     * Checks the CommandLine for the option with the name provided.  If
-     * present it sets the name and value pair in the _config field
-     * using "true" as the value of the option.
+     * Checks the CommandLine for the option with the name provided. If present
+     * it sets the name and value pair in the _config field using "true" as the
+     * value of the option.
      */
-    private static void overrideOption(Configuration config, CommandLine cmd, String option) {
-      if (cmd.hasOption(option)) {
-        config.setProperty(option, "true");
-      }
-    }
+    private static void overrideOption(Configuration config, CommandLine cmd,
+            String option)
+        {
+        if ( cmd.hasOption(option) )
+            {
+            config.setProperty(option, "true");
+            }
+        }
 
 }
