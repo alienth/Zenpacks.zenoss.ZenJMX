@@ -63,7 +63,7 @@ class ZenJMX(RRDDaemon):
          + ['ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService']
 
     def __init__(self, noopts=False):
-        RRDDaemon.__init__(self, 'zenjmx')
+        RRDDaemon.__init__(self, 'zenjmx', noopts)
 
         # map of deviceId -> JMXDeviceConfig
         self.deviceConfigs = {}
