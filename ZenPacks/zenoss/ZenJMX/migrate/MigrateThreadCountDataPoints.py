@@ -38,8 +38,8 @@ class MigrateThreadCountDataPoints(ZenPackMigration):
                 elif templateId == '/Devices/rrdTemplates/ZenJMX':
                     dpName = 'ZenJMX Thread Count_ThreadCount'
                 
-                log.warn("MigrateThreadCountDataPoints dpName %s" % dpName)
                 if dpName:
+                    log.debug("MigrateThreadCountDataPoints dpName %s" % dpName)
                     perfConf = d.getPerformanceServer()
                     log.debug("MigrateThreadCountDataPoints perfConf %s" % perfConf.id)
                     perfConf.deleteRRDFiles(device=d.id, datapoint=dpName)
