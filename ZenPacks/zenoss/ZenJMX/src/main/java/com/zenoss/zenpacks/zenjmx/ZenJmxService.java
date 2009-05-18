@@ -14,6 +14,8 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -151,6 +153,12 @@ public class ZenJmxService {
                 call.call(client);
                 results.addAll(createResult(summary));
               } catch (JmxException e) {
+              ByteArrayOutputStream baos = new ByteArrayOutputStream();
+              PrintStream ps = new PrintStream(baos);
+              e.printStackTrace(ps);
+              ps.flush();
+              String stackTrace = baos.toString();
+              _logger.debug(e.getMessage() +"\n" + stackTrace);
                 results.add(createError(summary, config, e));
               } finally {
                 summaries.remove(summary);
@@ -247,8 +255,10 @@ public class ZenJmxService {
 
     private Map<String, String> createConnectionError(String deviceId,
         String msg, Throwable e) {
+
       HashMap<String, String> error = createError(deviceId, msg + ":"
-          + e.getMessage());
+              + e.getMessage());
+      
       error.put(ConfigAdapter.EVENT_CLASS, "/Status/JMX/Connection");
       return error;
     }
