@@ -154,6 +154,9 @@ class ZenJMXConfigService(PerformanceConfig):
         returns None if the device does not have any JMX datsources 
         """
         deviceConfig = None
+        if not device.monitorDevice():
+            return None
+        
         for template in device.getRRDTemplates():
             for ds in template.getRRDDataSources('JMX'):
                 if ds.enabled:
