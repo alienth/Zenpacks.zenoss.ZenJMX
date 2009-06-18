@@ -38,9 +38,16 @@ shift
 
 . ${ZENJMX_HOME}/bin/java-functions.sh
 
+LOGPATH=`awk '/^logpath/ { print $2; }' ${CFGFILE}`
+if [ -z "${LOGPATH}" ]; then
+    LOGPATH="${ZENHOME}/log"
+fi
+
 cd ${LIB_DIR}
 LOG4J_PROPS=`find ${LIB_DIR} -name log4j.properties`
-replace "@@ZENJMX_LOGFILE@@" "${ZENHOME}/log/zenjmx.log" ${LOG4J_PROPS}
+sed -e "s@\(LOGFILE.File=\).*@\1${LOGPATH}/zenjmx.log@" ${LOG4J_PROPS} \
+    > ${LOG4J_PROPS}.new && \
+    mv ${LOG4J_PROPS}.new ${LOG4J_PROPS}
 
 CLASSPATH="${ZENJMX_HOME}:${LIB_DIR}"
 for jar in \
