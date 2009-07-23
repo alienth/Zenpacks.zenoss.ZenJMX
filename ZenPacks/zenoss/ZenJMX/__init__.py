@@ -36,6 +36,6 @@ class ZenPack(ZenPackBase):
         ('zJmxManagementPort', 12345, 'int'),
         ('zJmxAuthenticate', False, 'boolean'),
         ('zJmxUsername', 'admin', 'string'),
-        ('zJmxPassword', 'admin', 'string'),
+        ('zJmxPassword', 'admin', 'password'),
         ]
 
