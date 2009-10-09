@@ -1,7 +1,7 @@
 ###########################################################################
 #
 # This program is part of Zenoss Core, an open source monitoring platform.
-# Copyright (C) 2008, Zenoss Inc.
+# Copyright (C) 2008, 2009 Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 as published by
@@ -15,11 +15,11 @@ import md5
 import Globals
 
 from Products.ZenHub.services.PerformanceConfig import PerformanceConfig
-
 from Products.ZenUtils.ZenTales import talesEval
-
+from Products.ZenCollector.services.config import CollectorConfigService
 
 from twisted.spread import pb
+
 class RRDConfig(pb.Copyable, pb.RemoteCopy):
     """
     RRD configuration for a datapoint.
@@ -44,16 +44,14 @@ class JMXDeviceConfig(pb.Copyable, pb.RemoteCopy):
     """
     
     def __init__(self, device):
-        self.deviceId = device.id
-        #Each JMXDataSourceConfig in the list represents a zenjmx datasource
-        #from a template on a device.
+        self.id = device.id
         #map of jmxserverkey to JMXDataSourceConfig list
         self.jmxDataSourceConfigs = {}
         self.path = device.rrdPath()
+        self.manageIp = device.manageIp
         
         
     def findDataSource(self, dataSourceId):
-        dsList = []
         for subList in self.jmxDataSourceConfigs.values():
             for dsConfig in subList:
                 if(dsConfig.datasourceId == dataSourceId):
@@ -64,15 +62,15 @@ class JMXDeviceConfig(pb.Copyable, pb.RemoteCopy):
         """
         add a JMXDataSourceConfig to the device configuration
         """
-        key = jmxDataSourceConfig.getJmxServerKey()
+        key = jmxDataSourceConfig.getJMXServerKey()
         configs = self.jmxDataSourceConfigs.get(key)
         if(not configs):
             configs = []
             self.jmxDataSourceConfigs[key] = configs
         configs.append(jmxDataSourceConfig)
         
-
 pb.setUnjellyableForClass(JMXDeviceConfig, JMXDeviceConfig)
+
 
 class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
     """
@@ -108,7 +106,7 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
     def key(self):
         return self.device, self.datasourceId
 
-    def getJmxServerKey(self):
+    def getJMXServerKey(self):
         """
         string which represents the jmx server  and connection props. 
         Can be compared to determine if datasources configurations point to the
@@ -142,67 +140,29 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
 pb.setUnjellyableForClass(JMXDataSourceConfig, JMXDataSourceConfig)
 
 
-class ZenJMXConfigService(PerformanceConfig):
+class ZenJMXConfigService(CollectorConfigService):
     """ZenHub service for getting ZenJMX configurations 
        from the object database"""
+    def __init__(self, dmd, instance):
+        attributes = ()
+        CollectorConfigService.__init__(self,
+                                        dmd,
+                                        instance,
+                                        attributes)
 
-    def getDeviceConfig(self, device):
-        """
-        override method from PerformanceConfig
-        Returns a JMXDeviceConfig object if the device has
-        templates that have ZenJMX Datasource.
-        returns None if the device does not have any JMX datsources 
-        """
+    def _createDeviceProxy(self, device):
         deviceConfig = None
-        if not device.monitorDevice():
-            return None
-        
         for template in device.getRRDTemplates():
             for ds in template.getRRDDataSources('JMX'):
                 if ds.enabled:
                     if not deviceConfig:
                         deviceConfig = JMXDeviceConfig(device)
+                        # Default interval is 5 minutes.
+                        # This may be replaced with per datasource
+                        # intervals at some point.  For now, this
+                        # will be ignored at the collector.
+                        deviceConfig.configCycleInterval = 5 * 60
                     deviceConfig.add(
                          JMXDataSourceConfig(device, template, ds))
         return deviceConfig
 
-
-    def sendDeviceConfig(self, listener, config):
-        """
-        override method from PerformanceConfig.
-        Sends a JMXDeviceConfig for a device down to the daemon.
-        """
-        return listener.callRemote('updateDeviceConfig', config)
-
-
-    def remote_getDeviceConfigs(self, devices=None):
-        """
-        returns a list JMXDeviceConfig bound to the monitor
-        devices is a list of the device ids
-        If devices is None all jmx device confings bound to the monitor will be
-        returned, otherwise it will only return jmx device configs in the devices list
-        """
-        result = []
-        #loop over the device bound to the monitor
-        for device in self.config.devices():
-            if not devices or device.id in devices:
-                config = self.getDeviceConfig(device.primaryAq())
-                if config:
-                    result.append(config)
-        return result
-
-#
-#    def remote_getStatus(self):
-#        """Return devices with Mail problems."""
-#        where = "eventClass = '%s'" % (Status_Mail)
-#        issues = self.zem.getDeviceIssues(where=where, severity=3)
-#        return [d
-#                for d, count, total in issues
-#                if getattr(self.config.devices, d, None)]
-
-#if __name__ == '__main__':
-#    from Products.ZenUtils.ZCmdBase import ZCmdBase
-#    dmd = ZCmdBase().dmd
-#    c = ConfigService(dmd, 'localhost')
-#    print c.remote_getStatus()
-#    print c.remote_getConfig()
