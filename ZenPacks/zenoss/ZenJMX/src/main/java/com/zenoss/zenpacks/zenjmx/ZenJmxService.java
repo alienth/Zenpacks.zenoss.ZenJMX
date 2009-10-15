@@ -14,16 +14,12 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -105,18 +101,24 @@ public class ZenJmxService {
         client.connect();
         result.addAll(doCollect(client));
       } catch (Throwable e) {
-        Map<String, String> error = createConnectionError(_deviceId,
-            "error connecting to server", e);
-        result.add(error);
+        for(ConfigAdapter config : _configs)
+            {
+            Map<String, String> error = createConnectionError(config,
+                    "error connecting to server", e);
+            result.add(error);
+            }
 
       } finally {
         if (client != null) {
           try {
             client.close();
           } catch (JmxException e) {
-            Map<String, String> error = createConnectionError(_config
-                .getDevice(), "error closing connection to server", e);
-            result.add(error);
+          for(ConfigAdapter config : _configs)
+              {
+              Map<String, String> error = createConnectionError(config, 
+                      "error closing connection to server", e);
+              result.add(error);
+              }
           }
         }
       }
@@ -151,19 +153,15 @@ public class ZenJmxService {
               summaries.put(summary, config);
               try {
                 call.call(client);
-                results.addAll(createResult(summary));
+                results.addAll(createResult(summary, config));
               } catch (JmxException e) {
-              ByteArrayOutputStream baos = new ByteArrayOutputStream();
-              PrintStream ps = new PrintStream(baos);
-              e.printStackTrace(ps);
-              ps.flush();
-              String stackTrace = baos.toString();
-              _logger.debug(e.getMessage() +"\n" + stackTrace);
                 results.add(createError(summary, config, e));
               } finally {
                 summaries.remove(summary);
               }
             }
+
+            
           };
           // submit job to be run
           es.execute(job);
@@ -198,7 +196,8 @@ public class ZenJmxService {
       return jmxClient;
     }
 
-    private List<Map<String, String>> createResult(Summary summary) {
+    private List<Map<String, String>> createResult(Summary summary, 
+            ConfigAdapter config) {
       if (_logger.isDebugEnabled()) {
         _logger.debug(summary.toString());
       }
@@ -215,8 +214,7 @@ public class ZenJmxService {
         }
         HashMap<String, String> result = new HashMap<String, String>();
         results.add(result);
-        result.put(ConfigAdapter.DEVICE, summary.getDeviceId());
-        result.put(ConfigAdapter.DATASOURCE_ID, summary.getDataSourceId());
+        populateEventFields(result, config);
         result.put("value", value.toString());
         result.put("dpId", key);
       }
@@ -238,26 +236,27 @@ public class ZenJmxService {
       String msg = "DataSource %1$s; Timed out %2$s on mbean %3$s ";
       msg = String.format(msg, config.getDatasourceId(), summary
           .getCallSummary(), summary.getObjectName());
-      Map<String, String> error = createError(config, null);
-      error.put(SUMMARY, msg);
+      Map<String, String> error = createError(config, msg);
       return error;
     }
 
-    private HashMap<String, String> createError(String deviceId, String msg) {
+    private HashMap<String, String> createError(ConfigAdapter config, String msg) {
       HashMap<String, String> error = new HashMap<String, String>();
 
-      error.put(ConfigAdapter.DEVICE, deviceId);
-
+      populateEventFields(error, config);
       error.put(SUMMARY, msg);
 
       return error;
     }
 
-    private Map<String, String> createConnectionError(String deviceId,
+    private Map<String, String> createConnectionError(ConfigAdapter config,
         String msg, Throwable e) {
 
-      HashMap<String, String> error = createError(deviceId, msg + ":"
-              + e.getMessage());
+      Utility.debugStack(e);
+      String errorMsg = "DataSource %1$s; %2$s; Exception %3$s ";
+      errorMsg = String.format(errorMsg, config.getDatasourceId(), msg, 
+              e.getMessage());
+      HashMap<String, String> error = createError(config, errorMsg);
       
       error.put(ConfigAdapter.EVENT_CLASS, "/Status/JMX/Connection");
       return error;
@@ -266,14 +265,27 @@ public class ZenJmxService {
     private Map<String, String> createError(ConfigAdapter config, Exception e) {
       String msg = "";
       if (e != null)
+        Utility.debugStack(e);
         msg = e.getMessage();
-      HashMap<String, String> error = createError(config.getDevice(), msg);
-      error.put(ConfigAdapter.DATASOURCE_ID, config.getDatasourceId());
-      error.put(ConfigAdapter.EVENT_CLASS, config.getEventClass());
-      error.put(ConfigAdapter.EVENT_KEY, config.getEventKey());
-      error.put(ConfigAdapter.COMPONENT_KEY, config.getComponent());
+      HashMap<String, String> error = createError(config, msg);
       return error;
     }
+    
+    private void populateEventFields(Map<String,String> evt, 
+            ConfigAdapter config)
+        {
+        evt.put(ConfigAdapter.DEVICE, config.getDevice());
+        evt.put(ConfigAdapter.DATASOURCE_ID, config.getDatasourceId());
+        evt.put(ConfigAdapter.EVENT_CLASS, config.getEventClass());
+        String eventKey = config.getEventKey();
+        if (eventKey == null || "".equals(eventKey.trim()))
+            {
+            //narrow down events to a datasource so that they can be cleared
+            eventKey = config.getDatasourceId();
+            }
+        evt.put(ConfigAdapter.EVENT_KEY, eventKey);
+        evt.put(ConfigAdapter.COMPONENT_KEY, config.getComponent());
+        }
   }
 
 }

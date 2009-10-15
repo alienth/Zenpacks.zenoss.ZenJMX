@@ -516,6 +516,8 @@ class ZenJMXTask(ObservableMixin):
                     self.sendEvent({}, severity=Event.Clear,
                         eventClass='/Status/JMX/Connection',
                         summary='Connection is up',
+                        eventKey=result.get('eventKey'),
+                        component=result.get('component'),
                         device=deviceId)
                     self.sendEvent(evt,summary="Clear",severity=Event.Clear)
 

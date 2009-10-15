@@ -14,12 +14,15 @@
 ///////////////////////////////////////////////////////////////////////////
 package com.zenoss.zenpacks.zenjmx.call;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.zenoss.jmx.JmxException;
 import com.zenoss.zenpacks.zenjmx.ConfigAdapter;
 
 
@@ -158,5 +161,16 @@ public class Utility {
 
     return toReturn;
   }
+  
+  public static void debugStack(Throwable e)
+   {
+    if ( !_logger.isDebugEnabled() ) return;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(baos);
+    e.printStackTrace(ps);
+    ps.flush();
+    String stackTrace = baos.toString();
+    _logger.debug(e.getMessage() + "\n" + stackTrace);
+   }
 
 }
