@@ -88,7 +88,7 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
         for dp in datasource.datapoints():
             self.rrdConfig[dp.id] = RRDConfig(dp)
         self.thresholds = []
-        for thresh in [ th for th in template.thresholds() if th.enabled ]:
+        for thresh in (th for th in template.thresholds() if th.enabled):
             try:
                 self.thresholds.append(thresh.createThresholdInstance(device))
             except pythonThresholdException, ex:
