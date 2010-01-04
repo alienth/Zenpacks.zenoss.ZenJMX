@@ -285,6 +285,7 @@ public class ZenJmxService {
             }
         evt.put(ConfigAdapter.EVENT_KEY, eventKey);
         evt.put(ConfigAdapter.COMPONENT_KEY, config.getComponent());
+        evt.put(ConfigAdapter.RRD_PATH, config.getRrdPath());
         }
   }
 

@@ -40,6 +40,7 @@ public class ConfigAdapter {
     public static final String EVENT_KEY = "eventKey";
     public static final String EVENT_CLASS = "eventClass";
     public static final String COMPONENT_KEY = "component";
+    public static final String RRD_PATH = "rrdPath";
 
     
     public static final String DELIMITER = ",";
@@ -157,7 +158,10 @@ public class ConfigAdapter {
     }
     public String getComponent() {
       return (String) configMap.get(COMPONENT_KEY);
-  }
+    }
+    public String getRrdPath() {
+        return (String) configMap.get(RRD_PATH);
+    }
 
     
     public List<String> getDataPoints() {

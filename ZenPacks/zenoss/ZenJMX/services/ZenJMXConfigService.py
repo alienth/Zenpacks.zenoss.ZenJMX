@@ -19,6 +19,8 @@ from Products.ZenUtils.ZenTales import talesEval
 from Products.ZenEvents.Exceptions import pythonThresholdException
 from Products.ZenCollector.services.config import CollectorConfigService
 
+from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import JMXDataSource
+
 from twisted.spread import pb
 
 class RRDConfig(pb.Copyable, pb.RemoteCopy):
@@ -48,9 +50,14 @@ class JMXDeviceConfig(pb.Copyable, pb.RemoteCopy):
         self.id = device.id
         #map of jmxserverkey to JMXDataSourceConfig list
         self.jmxDataSourceConfigs = {}
-        self.path = device.rrdPath()
         self.manageIp = device.manageIp
-        
+        self.thresholds = []
+
+        # Default interval is 5 minutes.
+        # This may be replaced with per datasource
+        # intervals at some point.  For now, this
+        # will be ignored at the collector.
+        self.configCycleInterval = 5 * 60
         
     def findDataSource(self, dataSourceId):
         for subList in self.jmxDataSourceConfigs.values():
@@ -78,22 +85,24 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
     Represents a JMX datasource configuration on a device. 
     """
 
-    def __init__(self, device, template, datasource):
+    def __init__(self, device, component, template, datasource):
         self.device = device.id
         self.manageIp = device.manageIp
         self.datasourceId = datasource.id
-        self.copyProperties(device, datasource)
+
+        if component is None:
+            self.component = datasource.getComponent(device)
+            self.rrdPath = device.rrdPath()
+            self.copyProperties(device, datasource)
+        else:
+            self.component = datasource.getComponent(component)
+            self.rrdPath = component.rrdPath()
+            self.copyProperties(component, datasource)
+
         #dictionary of datapoint name to RRDConfig
         self.rrdConfig = {}
         for dp in datasource.datapoints():
             self.rrdConfig[dp.id] = RRDConfig(dp)
-        self.thresholds = []
-        for thresh in (th for th in template.thresholds() if th.enabled):
-            try:
-                self.thresholds.append(thresh.createThresholdInstance(device))
-            except pythonThresholdException, ex:
-                # Ignore invalid threshold definitions.
-                continue
 
 
     def copyProperties(self, device, ds):
@@ -156,18 +165,34 @@ class ZenJMXConfigService(CollectorConfigService):
                                         attributes)
 
     def _createDeviceProxy(self, device):
-        deviceConfig = None
+        deviceConfig = JMXDeviceConfig(device)
+        deviceConfig.thresholds += device.getThresholdInstances(
+            JMXDataSource.sourcetype)
+
         for template in device.getRRDTemplates():
-            for ds in template.getRRDDataSources('JMX'):
-                if ds.enabled:
-                    if not deviceConfig:
-                        deviceConfig = JMXDeviceConfig(device)
-                        # Default interval is 5 minutes.
-                        # This may be replaced with per datasource
-                        # intervals at some point.  For now, this
-                        # will be ignored at the collector.
-                        deviceConfig.configCycleInterval = 5 * 60
-                    deviceConfig.add(
-                         JMXDataSourceConfig(device, template, ds))
+            for ds in self._getDataSourcesFromTemplate(template):
+                deviceConfig.add(JMXDataSourceConfig(
+                    device, None, template, ds))
+
+        for component in device.getMonitoredComponents():
+            deviceConfig.thresholds += component.getThresholdInstances(
+                JMXDataSource.sourcetype)
+
+            for template in component.getRRDTemplates():
+                for ds in self._getDataSourcesFromTemplate(template):
+                    deviceConfig.add(JMXDataSourceConfig(
+                        device, component, template, ds))
+
+        # Don't both returning a proxy if there are no datasources.
+        if not len(deviceConfig.jmxDataSourceConfigs.keys()):
+            return None
+
         return deviceConfig
 
+    def _getDataSourcesFromTemplate(self, template):
+        datasources = []
+        for ds in template.getRRDDataSources('JMX'):
+            if not ds.enabled: continue
+            datasources.append(ds)
+
+        return datasources

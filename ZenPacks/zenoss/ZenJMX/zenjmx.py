@@ -506,11 +506,12 @@ class ZenJMXTask(ObservableMixin):
                 deviceId = result.get('device')
                 evt = self.createEvent(result)
                 if not evtSummary:
+                    rrdPath = result.get('rrdPath')
                     dsId = result.get('datasourceId')
                     dpId = result.get('dpId')
                     value = result.get('value')
                     try:
-                        self.storeRRD(deviceId, dsId, dpId, value)
+                        self.storeRRD(deviceId, rrdPath, dsId, dpId, value)
                     except ValueError:
                         pass
                     self.sendEvent({}, severity=Event.Clear,
@@ -542,6 +543,7 @@ class ZenJMXTask(ObservableMixin):
     def storeRRD(
         self,
         deviceId,
+        rrdPath,
         dataSourceId,
         dataPointId,
         dpValue,
@@ -573,8 +575,7 @@ class ZenJMXTask(ObservableMixin):
                 % (deviceId, dataSourceId, dataPointId))
             return
 
-        devicePath = deviceConfig.path
-        dpPath = '/'.join((devicePath, rrdConf.dpName))
+        dpPath = '/'.join((rrdPath, rrdConf.dpName))
         value = self._dataService.writeRRD(dpPath, dpValue, rrdConf.rrdType,
                               rrdConf.command)
 
