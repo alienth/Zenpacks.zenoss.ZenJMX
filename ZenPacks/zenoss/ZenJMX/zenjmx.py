@@ -576,8 +576,10 @@ class ZenJMXTask(ObservableMixin):
             return
 
         dpPath = '/'.join((rrdPath, rrdConf.dpName))
+        min = rrdConf.min 
+        max = rrdConf.max
         value = self._dataService.writeRRD(dpPath, dpValue, rrdConf.rrdType,
-                              rrdConf.command)
+                              rrdConf.command, min=min, max=max)
 
     def _finished(self, results):
         for result in results:
