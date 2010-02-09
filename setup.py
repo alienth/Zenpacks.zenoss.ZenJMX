@@ -7,7 +7,7 @@ AUTHOR = "Zenoss"
 LICENSE = ""
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.zenoss']
 INSTALL_REQUIRES = []
-COMPAT_ZENOSS_VERS = ">=2.3.70"
+COMPAT_ZENOSS_VERS = ">=2.5.70"
 PREV_ZENPACK_NAME = "ZenJMX"
 # STOP_REPLACEMENTS
 ################################
