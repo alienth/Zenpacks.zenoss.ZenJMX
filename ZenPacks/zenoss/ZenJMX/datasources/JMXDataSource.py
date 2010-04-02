@@ -38,7 +38,7 @@ class JMXDataSource(ZenPackPersistence, Base):
     timeout = 15
     eventClass = '/Status/JMX'
     component = JMX
-
+    protocolTypes  = ['RMI', 'JMXMP']
     hostname = '${dev/id}'
     expectedIpAddress = ''
 
@@ -108,7 +108,7 @@ class JMXDataSource(ZenPackPersistence, Base):
 
     def getProtocols(self):
         """return list of supported JMX protocols"""
-        return ['RMI', 'JMXMP']
+        return JMXDataSource.protocolTypes
 
 
     def zmanage_editProperties(self, REQUEST=None):
