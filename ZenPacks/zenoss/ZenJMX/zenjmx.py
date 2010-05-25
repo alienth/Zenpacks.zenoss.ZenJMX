@@ -17,7 +17,6 @@ __doc__ = """Monitor Java Management eXtension (JMX) mbeans
 
 Dispatches calls to a java server process to collect JMX values for a device.
 """
-
 import logging
 import time
 import sys
@@ -53,7 +52,6 @@ import ZenPacks.zenoss.ZenJMX
 from ZenPacks.zenoss.ZenJMX.services.ZenJMXConfigService import JMXDataSourceConfig
 
 log = logging.getLogger( "zen.zenjmx" )
-
 DEFAULT_HEARTBEAT_TIME = 5 * 60
 
 WARNING_EVENT = dict(eventClass='/Status/JMX', component='JMX',
@@ -400,7 +398,6 @@ class ZenJMXTask(ObservableMixin):
                  clientName=DEFAULT_JMX_JAVA_CLIENT_NAME ):
 
         super( ZenJMXTask, self ).__init__()
-
         self.name = taskName
         self.configId = deviceId
         self.state = TaskStates.STATE_IDLE

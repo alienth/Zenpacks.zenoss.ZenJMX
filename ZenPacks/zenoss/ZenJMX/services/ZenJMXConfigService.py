@@ -13,7 +13,7 @@
 import md5
 
 import Globals
-
+import logging
 from Products.ZenHub.services.PerformanceConfig import PerformanceConfig
 from Products.ZenUtils.ZenTales import talesEval
 from Products.ZenEvents.Exceptions import pythonThresholdException
@@ -22,7 +22,7 @@ from Products.ZenCollector.services.config import CollectorConfigService
 from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import JMXDataSource
 
 from twisted.spread import pb
-
+log = logging.getLogger( "zen.zenjmxconfigservices" )
 class RRDConfig(pb.Copyable, pb.RemoteCopy):
     """
     RRD configuration for a datapoint.
@@ -89,7 +89,6 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
         self.device = device.id
         self.manageIp = device.manageIp
         self.datasourceId = datasource.id
-
         if component is None:
             self.component = datasource.getComponent(device)
             self.rrdPath = device.rrdPath()
@@ -140,12 +139,11 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
         components = [self.jmxProtocol]
         if self.jmxProtocol == "RMI":
             components.append(self.rmiContext)
-        components.append(self.jmxPort)
+        components.append(str(self.jmxPort))
         if (self.authenticate):
             creds = self.username + self.password
             components.append( md5.new(creds).hexdigest() );
         
-            
         return ":".join(components)
     
     def update(self, value):
