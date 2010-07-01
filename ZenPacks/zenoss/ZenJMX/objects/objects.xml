@@ -42,6 +42,9 @@ HeapMemoryUsage
 </property>
 <tomanycont id='datapoints'>
 <object id='committed' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current amount of memory (in bytes) of the heap that is guaranteed to be available for use by the Java virtual machine.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -50,6 +53,9 @@ True
 </property>
 </object>
 <object id='used' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current memory usage of the heap that is used for object allocation.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -95,6 +101,9 @@ NonHeapMemoryUsage
 </property>
 <tomanycont id='datapoints'>
 <object id='committed' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current amount of memory (in bytes) of the non-heap that is guaranteed to be available for use by the Java virtual machine.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -103,6 +112,9 @@ True
 </property>
 </object>
 <object id='used' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current memory usage of non-heap memory that is used by the Java virtual machine
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -148,6 +160,9 @@ OpenFileDescriptorCount
 </property>
 <tomanycont id='datapoints'>
 <object id='OpenFileDescriptorCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of open file descriptors the JVM is working
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -193,6 +208,9 @@ ThreadCount
 </property>
 <tomanycont id='datapoints'>
 <object id='ThreadCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current number of live threads including both daemon and non-daemon threads
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -519,6 +537,9 @@ HeapMemoryUsage
 </property>
 <tomanycont id='datapoints'>
 <object id='committed' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current amount of memory (in bytes) of the heap that is guaranteed to be available for use by the Java virtual machine.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -527,6 +548,9 @@ True
 </property>
 </object>
 <object id='used' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current memory usage of the heap that is used for object allocation.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -572,6 +596,9 @@ NonHeapMemoryUsage
 </property>
 <tomanycont id='datapoints'>
 <object id='committed' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current amount of memory (in bytes) of the non-heap that is guaranteed to be available for use by the Java virtual machine.
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -580,6 +607,9 @@ True
 </property>
 </object>
 <object id='used' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current memory usage of non-heap memory that is used by the Java virtual machine
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -625,6 +655,9 @@ OpenFileDescriptorCount
 </property>
 <tomanycont id='datapoints'>
 <object id='OpenFileDescriptorCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+The number of open file descriptors the JVM is working
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
@@ -670,6 +703,9 @@ ThreadCount
 </property>
 <tomanycont id='datapoints'>
 <object id='ThreadCount' module='Products.ZenModel.RRDDataPoint' class='RRDDataPoint'>
+<property type="text" id="zendoc" mode="w" >
+Returns the current number of live threads including both daemon and non-daemon threads
+</property>
 <property select_variable="rrdtypes" type="selection" id="rrdtype" mode="w" >
 GAUGE
 </property>
