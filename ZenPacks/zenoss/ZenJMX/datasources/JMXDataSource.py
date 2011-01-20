@@ -42,14 +42,14 @@ class JMXDataSource(ZenPackPersistence, Base):
     hostname = '${dev/id}'
     expectedIpAddress = ''
 
-    jmxPort = ''
+    jmxPort = '${here/zJmxManagementPort}'
     jmxProtocol = 'RMI'
     jmxRawService = ''
     rmiContext = 'jmxrmi'
     objectName = ''
-    username = ''
-    password = ''
-    authenticate = False
+    username = '${here/zJmxUsername}'
+    password = '${here/zJmxPassword}'
+    authenticate = '${here/zJmxAuthenticate}'
 
     attributeName = ''
     attributePath = ''
@@ -65,7 +65,7 @@ class JMXDataSource(ZenPackPersistence, Base):
         {'id':'rmiContext', 'type':'string', 'mode':'w'},
         {'id':'objectName', 'type':'string', 'mode':'w'},
 
-        {'id':'authenticate', 'type':'boolean', 'mode':'w'},
+        {'id':'authenticate', 'type':'string', 'mode':'w'},
         {'id':'username', 'type':'string', 'mode':'w'},
         {'id':'password', 'type':'string', 'mode':'w'},
 

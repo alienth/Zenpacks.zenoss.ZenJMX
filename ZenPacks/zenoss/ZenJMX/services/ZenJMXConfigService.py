@@ -113,6 +113,10 @@ class JMXDataSourceConfig(pb.Copyable, pb.RemoteCopy):
             value = getattr(ds, propName)
             if str(value).find('$') >= 0:
                 value = talesEval('string:%s' % (value,), device)
+            if propName == 'authenticate':
+                if value:
+                    value = str(value).lower().capitalize()
+                value = bool(value)
             setattr(self, propName, value)
 
 

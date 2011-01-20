@@ -17,7 +17,7 @@ from Products.Zuul.utils import ZuulMessageFactory as _t
 
 class IJMXDataSourceInfo(IRRDDataSourceInfo):
     # Connection Info
-    jmxPort = schema.Int(title=_t(u'Management Port'), group=_t(u'JMX Connection and Metadata Infomation'))
+    jmxPort = schema.Text(title=_t(u'Management Port'), group=_t(u'JMX Connection and Metadata Infomation'))
     jmxProtocol = schema.Choice(title=_t(u'Protocol'), group=_t(u'JMX Connection and Metadata Infomation'),
                                 vocabulary='jmxProtocolVocabulary')
     jmxRawService = schema.Text(title=_t(u'Raw Service URL (advanced users only)'), group=_t(u'JMX Connection and Metadata Infomation'))
@@ -26,7 +26,7 @@ class IJMXDataSourceInfo(IRRDDataSourceInfo):
 
     # Authentication
     username = schema.Text(title=_t(u'Username'), group=_t(u'JMX Remote Authentication Information'))
-    authenticate = schema.Bool(title=_t(u'Auth Enabled'), group=_t(u'JMX Remote Authentication Information'))
+    authenticate = schema.Text(title=_t(u'Auth Enabled'), group=_t(u'JMX Remote Authentication Information'))
     password = schema.Password(title=_t(u'Password'), group=_t(u'JMX Remote Authentication Information'))
     
     # Operation

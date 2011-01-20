@@ -25,9 +25,6 @@ JMX
 <property type="int" id="cycletime" mode="w" >
 300
 </property>
-<property type="string" id="jmxPort" mode="w" >
-12346
-</property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
 </property>
@@ -83,9 +80,6 @@ JMX
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
-</property>
-<property type="string" id="jmxPort" mode="w" >
-12346
 </property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
@@ -143,9 +137,6 @@ JMX
 <property type="int" id="cycletime" mode="w" >
 300
 </property>
-<property type="string" id="jmxPort" mode="w" >
-12346
-</property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
 </property>
@@ -190,9 +181,6 @@ JMX
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
-</property>
-<property type="string" id="jmxPort" mode="w" >
-12346
 </property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
@@ -520,9 +508,6 @@ JMX
 <property type="int" id="cycletime" mode="w" >
 300
 </property>
-<property type="string" id="jmxPort" mode="w" >
-11111
-</property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
 </property>
@@ -578,9 +563,6 @@ JMX
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
-</property>
-<property type="string" id="jmxPort" mode="w" >
-11111
 </property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
@@ -638,9 +620,6 @@ JMX
 <property type="int" id="cycletime" mode="w" >
 300
 </property>
-<property type="string" id="jmxPort" mode="w" >
-11111
-</property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
 </property>
@@ -685,9 +664,6 @@ JMX
 </property>
 <property type="int" id="cycletime" mode="w" >
 300
-</property>
-<property type="string" id="jmxPort" mode="w" >
-11111
 </property>
 <property type="string" id="jmxProtocol" mode="w" >
 RMI
