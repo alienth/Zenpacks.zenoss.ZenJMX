@@ -4,8 +4,8 @@
 # Copyright (C) 2008, 2009 Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 2 as published by
-# the Free Software Foundation.
+# under the terms of the GNU General Public License version 2 or (at your
+# option) any later version as published by the Free Software Foundation.
 #
 # For complete information please visit: http://www.zenoss.com/oss/
 #
@@ -17,6 +17,7 @@ import logging
 from Products.ZenHub.services.PerformanceConfig import PerformanceConfig
 from Products.ZenUtils.ZenTales import talesEval
 from Products.ZenEvents.Exceptions import pythonThresholdException
+from Products.ZenEvents.ZenEventClasses import Error, Clear
 from Products.ZenCollector.services.config import CollectorConfigService
 
 from ZenPacks.zenoss.ZenJMX.datasources.JMXDataSource import JMXDataSource
@@ -48,6 +49,7 @@ class JMXDeviceConfig(pb.Copyable, pb.RemoteCopy):
     
     def __init__(self, device):
         self.id = device.id
+        self.configId = device.id
         #map of jmxserverkey to JMXDataSourceConfig list
         self.jmxDataSourceConfigs = {}
         self.manageIp = device.manageIp
@@ -165,6 +167,37 @@ class ZenJMXConfigService(CollectorConfigService):
                                         dmd,
                                         instance,
                                         attributes)
+        self._ds_errors = {}
+
+
+    def _get_ds_conf(self, device, component, template, ds):
+        component_id = None if (component is None) else component.id
+        ds_error_key = (device.id, component_id, template.id, ds.id)
+        ds_conf = None
+
+        try:
+            ds_conf = JMXDataSourceConfig(device, component, template, ds)
+            evt = self._ds_errors.pop(ds_error_key, None)
+            if evt is not None:
+                evt["severity"] = Clear
+                self.sendEvent(evt)
+
+        except Exception, e:
+            fmt = "Evaluation of data source '{0.id}' in template '{1.id}' failed: {2.__class__.__name__}: {2}"
+            summary = fmt.format(ds, template, e)
+            evt = dict(severity=Error,
+                       device=device.id,
+                       eventClass="/Status/JMX",
+                       summary=summary)
+            msg = summary + " device={0.id}".format(device)
+            evt["component"] = component_id
+            msg += ", component={0}".format(component_id)
+            self.sendEvent(evt)
+            self._ds_errors[ds_error_key] = evt
+            self.log.error(msg)
+
+        return ds_conf
+
 
     def _createDeviceProxy(self, device):
         deviceConfig = JMXDeviceConfig(device)
@@ -173,8 +206,9 @@ class ZenJMXConfigService(CollectorConfigService):
 
         for template in device.getRRDTemplates():
             for ds in self._getDataSourcesFromTemplate(template):
-                deviceConfig.add(JMXDataSourceConfig(
-                    device, None, template, ds))
+                ds_conf = self._get_ds_conf(device, None, template, ds)
+                if ds_conf is not None:
+                    deviceConfig.add(ds_conf)
 
         for component in device.getMonitoredComponents():
             deviceConfig.thresholds += component.getThresholdInstances(
@@ -182,8 +216,9 @@ class ZenJMXConfigService(CollectorConfigService):
 
             for template in component.getRRDTemplates():
                 for ds in self._getDataSourcesFromTemplate(template):
-                    deviceConfig.add(JMXDataSourceConfig(
-                        device, component, template, ds))
+                    ds_conf = JMXDataSourceConfig(device, component, template, ds)
+                    if ds_conf is not None:
+                        deviceConfig.add(ds_conf)
 
         # Don't both returning a proxy if there are no datasources.
         if not len(deviceConfig.jmxDataSourceConfigs.keys()):

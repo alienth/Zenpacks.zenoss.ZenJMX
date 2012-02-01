@@ -1,22 +1,17 @@
 package com.zenoss.zenpacks.zenjmx;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryManagerMXBean;
-import java.util.Arrays;
-import java.util.List;
+import com.zenoss.jmx.JmxException;
+import com.zenoss.jmx.ValueExtractor;
+import com.zenoss.zenpacks.zenjmx.call.ZenJMXTest;
+import junit.framework.TestCase;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularDataSupport;
-
-import junit.framework.TestCase;
-
-import com.zenoss.jmx.JmxException;
-import com.zenoss.jmx.ValueExtractor;
-import com.zenoss.zenpacks.zenjmx.call.ZenJMXTest;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
 
 public class ValueExtractorTest extends TestCase {
 
@@ -25,9 +20,7 @@ public class ValueExtractorTest extends TestCase {
     private TabularData testTabular = null;
     private TabularData testSimpleTabular = null;
 
-    Object gcObject = null;
     ObjectName testObjectName = null;
-    ObjectName gcObjectName = null;
     boolean isOneSix = false;
 
     @Override
@@ -62,20 +55,6 @@ public class ValueExtractorTest extends TestCase {
 
             o = mbs.getAttribute(testObjectName, "SimpleTabularTestData");
             testSimpleTabular = (TabularData) o;
-            }
-
-        // lets find a registered gc mbean
-        for (MemoryManagerMXBean gc : ManagementFactory
-                .getMemoryManagerMXBeans())
-            {
-            String name = gc.getName();
-            gcObjectName = new ObjectName(
-                    "java.lang:type=GarbageCollector,name=" + name);
-            if ( mbs.isRegistered(gcObjectName) )
-                {
-                gcObject = mbs.getAttribute(gcObjectName, "LastGcInfo");
-                break;
-                }
             }
 
         }
@@ -214,103 +193,6 @@ public class ValueExtractorTest extends TestCase {
             return;
             }
         fail("expected an exception");
-        }
-
-    public void testGetGcThreadCount() throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject, "GcThreadCount");
-        assertEquals(Integer.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGc() throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc");
-        assertEquals(TabularDataSupport.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpace() throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.Code Cache");
-        assertEquals(CompositeDataSupport.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceWithIndex() throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Code Cache]");
-        assertEquals(CompositeDataSupport.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceWithBadIndex()
-            throws Exception
-        {
-        try
-            {
-
-            ValueExtractor.getDataValue(gcObject,
-                    "memoryUsageAfterGc.[Code Cache, Committed]");
-            }
-        catch (JmxException e)
-            {
-            return;
-            }
-        fail("expected an exception");
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceCommitted() throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.Code Cache.committed");
-        assertEquals(Long.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithIndex()
-            throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Code Cache].committed");
-        assertEquals(Long.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithIndexAndColumn()
-            throws Exception
-        {
-
-        Object result = ValueExtractor.getDataValue(gcObject,
-                "memoryUsageAfterGc.[Code Cache].{value}.committed");
-        assertEquals(Long.class, result.getClass());
-
-        }
-
-    public void testGetMemoryUsageAfterGcEdenSpaceCommittedWithExtraPath()
-            throws Exception
-        {
-        try
-            {
-            ValueExtractor.getDataValue(gcObject,
-                    "endTime.[Code Cache].committed.pop");
-            }
-        catch (JmxException e)
-            {
-            return;
-            }
-        fail("expected an exception");
-
         }
 
     public void testSplit() throws Exception

@@ -6,8 +6,8 @@
 # Copyright (C) 2008, 2009 Zenoss Inc.
 #
 # This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License version 2 as published by
-# the Free Software Foundation.
+# under the terms of the GNU General Public License version 2 or (at your
+# option) any later version as published by the Free Software Foundation.
 #
 # For complete information please visit: http://www.zenoss.com/oss/
 #
@@ -103,6 +103,9 @@ class ZenJMXPreferences(object):
                                default=5, type='int',
                                help='Number of ports to attempt when starting' +
                                     'Java jmx client')
+        parser.add_option('--javaheap',
+                            dest="maxHeap",type="int", default=512,
+                            help="Max heap, in MB, to use for java process")
                                
     def postStartup(self):
         pass
@@ -139,7 +142,8 @@ class ZenJMXJavaClientImpl(ProcessProtocol):
         self,
         args,
         cycle=True,
-        zenjmxjavaport=9988
+        zenjmxjavaport=9988,
+        maxHeap=512
         ):
         """
         Initializer
@@ -161,6 +165,7 @@ class ZenJMXJavaClientImpl(ProcessProtocol):
         self.args = args
         self.cycle = cycle
         self.listenPort = zenjmxjavaport
+        self._maxHeap = maxHeap
         self.restartEnabled = False
         self._eventService = zope.component.queryUtility(IEventService)
         self._preferences = zope.component.queryUtility(ICollectorPreferences,
@@ -276,8 +281,10 @@ class ZenJMXJavaClientImpl(ProcessProtocol):
         cmd = (zenjmxjavacmd, ) + args
         self.log.debug('run():spawn process %s' % (cmd, ))
         self.deferred = Deferred()
+        env = dict(os.environ)
+        env['JVM_MAX_HEAP'] = '-Xmx%sm'%self._maxHeap
         self.process = reactor.spawnProcess(self, zenjmxjavacmd, cmd,
-                env=None)
+                env=env)
         return self.deferred
 
 
@@ -314,9 +321,10 @@ class ZenJMXJavaClientInitialization(object):
         def loadPrefs():
             log.debug( "Retrieving java client startup args")
             preferences = zope.component.queryUtility(ICollectorPreferences,
-                                                      'zenjmx')
+                                                 'zenjmx')
             self._args = preferences.getJavaClientArgs()
             self._cycle = preferences.options.cycle
+            self._maxHeap = preferences.options.maxHeap
             self._startingPort = preferences.getStartingPort()
             self._rpcPort = self._startingPort
             self._attemptedPortRange = preferences.getAttemptedPortRange()
@@ -337,7 +345,7 @@ class ZenJMXJavaClientInitialization(object):
         """
         log.debug( 'Attempting java client startup on port %s',
                     self._rpcPort )
-        self._jmxClient = ZenJMXJavaClientImpl( self._args, self._cycle, self._rpcPort )
+        self._jmxClient = ZenJMXJavaClientImpl( self._args, self._cycle, self._rpcPort, self._maxHeap )
         return self._jmxClient.run()
 
     def _startJavaProc( self, result=None ):
@@ -565,7 +573,14 @@ class ZenJMXTask(ObservableMixin):
                   % (deviceId, dataSourceId))
             return
         rrdConf = dsConfig.rrdConfig.get(dataPointId)
-
+        type = rrdConf.rrdType
+        if(type in ('COUNTER', 'DERIVE')):
+            parts = str(dpValue).split('.')
+            if len(parts) == 2 and int(parts[1]) == 0:
+                #if the value just has trailing zeros treat as int
+                dpValue = int(float(dpValue))
+            elif len(parts)>=2:
+                log.warning("value %s not valid for derive or counter data points", dpValue)
         if not rrdConf:
             log.info(
                 'No RRD config found for device %s datasource %s datapoint %s' \

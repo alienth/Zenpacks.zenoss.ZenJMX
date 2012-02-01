@@ -28,8 +28,6 @@ install:
 	cp ${ZENJMX_HOME}/jmxremote_optional.jar ${LIB_DIR}
 	cp ${ZENJMX_HOME}/src/main/resources/log4j.properties ${LIB_DIR}
 	rm -rf ${TARGET}
-	rm -f ${LIB_DIR}/zenjmx-1.0-SNAPSHOT/junit-3.8.1.jar
-	rm -f ${LIB_DIR}/zenjmx-1.0-SNAPSHOT/xml-apis-1.0.b2.jar
 
 
 clean:

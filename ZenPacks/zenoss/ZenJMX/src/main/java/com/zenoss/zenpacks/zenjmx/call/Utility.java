@@ -81,6 +81,10 @@ public class Utility {
             throw new ConfigurationException("Datasource " + 
                 config.getDatasourceId() + message);
         }
+        if (hostAddr.indexOf(':') != -1) {
+            // IPv6 literal address
+            hostAddr = '[' + hostAddr + ']';
+        }
     
         url = "service:jmx:";
         if (protocol.equals("JMXMP"))
@@ -153,7 +157,7 @@ public class Utility {
     if (obj1.length != obj2.length) {
       return false;
     }
-    
+
     boolean toReturn = true;
     for (int i = 0; i < obj1.length; i++) {
       toReturn &= equals(obj1[i], obj2[i]);
@@ -161,7 +165,7 @@ public class Utility {
 
     return toReturn;
   }
-  
+
   public static void debugStack(Throwable e)
    {
     if ( !_logger.isDebugEnabled() ) return;

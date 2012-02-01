@@ -49,18 +49,13 @@ sed -e "s@\(LOGFILE.File=\).*@\1${LOGPATH}/zenjmx.log@" ${LOG4J_PROPS} \
     > ${LOG4J_PROPS}.new && \
     mv ${LOG4J_PROPS}.new ${LOG4J_PROPS}
 
-CLASSPATH="${ZENJMX_HOME}:${LIB_DIR}"
-for jar in \
-    `find . -name \*.jar`
-do
-    CLASSPATH="${CLASSPATH}:${jar}"
-done
-
 # these variables must be set (this includes CLASSPATH, which is set above)
-MAIN_CLASS="com.zenoss.zenpacks.zenjmx.ZenJmxMain"
+ZENJMX_JAR=${LIB_DIR}/zenjmx.jar
 START_ARGS="--configfile ${CFGFILE} $@"
 RUN_ARGS="--configfile ${CFGFILE} $@"
 
 JMX_LISTEN_PORT=`awk '/^jmxremoteport/ { print $2; }' ${CFGFILE}`
+DEFAULT_ZENJMX_JVM_ARGS="${DEFAULT_ZENJMX_JVM_ARGS} -server ${JVM_MAX_HEAP}"
+JVM_ARGS="$DEFAULT_ZENJMX_JVM_ARGS"
 
 generic $@
